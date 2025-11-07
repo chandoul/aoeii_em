@@ -60,8 +60,32 @@ Filename: "{app}\tools\aoeii_em.ahk"; Description: "Run Age of Empires II Easy M
 
 [Languages]
 Name: "Arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
+Name: "Armenian"; MessagesFile: "compiler:Languages\Armenian.isl"
 Name: "French"; MessagesFile: "compiler:Languages\French.isl"
 Name: "Turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
+Name: "BrazilianPortuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+Name: "Bulgarian"; MessagesFile: "compiler:Languages\Bulgarian.isl"
+Name: "Catalan"; MessagesFile: "compiler:Languages\Catalan.isl"
+Name: "Corsican"; MessagesFile: "compiler:Languages\Corsican.isl"
+Name: "Czech"; MessagesFile: "compiler:Languages\Czech.isl"
+Name: "Danish"; MessagesFile: "compiler:Languages\Danish.isl"
+Name: "Dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
+Name: "Finnish"; MessagesFile: "compiler:Languages\Finnish.isl"
+Name: "German"; MessagesFile: "compiler:Languages\German.isl"
+Name: "Hebrew"; MessagesFile: "compiler:Languages\Hebrew.isl"
+Name: "Hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
+Name: "Italian"; MessagesFile: "compiler:Languages\Italian.isl"
+Name: "Japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "Korean"; MessagesFile: "compiler:Languages\Korean.isl"
+Name: "Norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
+Name: "Polish"; MessagesFile: "compiler:Languages\Polish.isl"
+Name: "Portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
+Name: "Russian"; MessagesFile: "compiler:Languages\Russian.isl"
+Name: "Slovak"; MessagesFile: "compiler:Languages\Slovak.isl"
+Name: "Spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+Name: "Swedish"; MessagesFile: "compiler:Languages\Swedish.isl"
+Name: "Tamil"; MessagesFile: "compiler:Languages\Tamil.isl"
+Name: "Ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [code]
 // Registery view 32/64
