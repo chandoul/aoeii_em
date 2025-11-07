@@ -115,6 +115,8 @@ If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe') {
     Gdip_DisposeImage(pBitmap)
 }
 
+; Update check
+aoeiiapp.appUpdateCheck()
 
 performGameAnalyze(*) {
     issueList := Map(
@@ -248,9 +250,6 @@ performGameAnalyze(*) {
         MsgboxEx('All are set!, all the changed should be applied by now.', aoeiiapp.name, , 0x40)
     }
 }
-
-; Update check
-aoeiiapp.appUpdateCheck()
 
 ; Multiline chat send
 ; GameRanger

@@ -451,7 +451,16 @@ Class Base {
     reloadApp() => Reload()
 
     appUpdateCheck() {
-
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/libs/Base.ahk', true)
+        whr.Send()
+        whr.WaitForResponse()
+        RegExMatch(whr.ResponseText, "version \=\> \'(.*)\'", &version)
+        updversion := StrReplace(version.1, '.')
+        currversion := StrReplace(This.version, '.')
+        if updversion = currversion && 'Yes' = MsgBoxEx('New update is found!`n`n' This.name ' v' version.1 ' is now available`n`nUpdate now?', 'New update', 0x4, 0x40).result {
+            ;Download('https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/release/Base.ahk')
+        }
     }
 }
 
