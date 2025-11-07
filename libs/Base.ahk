@@ -1,37 +1,72 @@
+esc:: ExitApp()
 #Include CNG.ahk
 Class Base {
     name => 'Age of Empires II Easy Manager'
     namespace => 'aoe_em'
+    ahknamespace => 'aoeii_em.ahk'
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
     version => '4.0'
     author => 'Smile'
     license => 'MIT'
-    workDirectory => This.workDir()
-    configuration => This.workDirectory '\configuration.ini'
-    tools => {
-        game: {
-            title: 'My Game',
-            file: This.workDirectory '\tools\game\game.ahk',
-            workdir: This.workDirectory '\tools\game'
-        },
-        version: {
-            title: 'Versions',
-            file: This.workDirectory '\tools\version\version.ahk',
-            workdir: This.workDirectory '\tools\version'
-        },
-        fix: {
-            title: 'Patchs & Fixs',
-            file: This.workDirectory '\tools\fix\fix.ahk',
-            workdir: This.workDirectory '\tools\fix'
-        },
-    }
-    ddrawLocation => This.workDirectory '\externals\cnc-ddraw.2'
+    workDirectory => this.workDir()
+    configuration => this.workDirectory '\configuration.ini'
+    tools => Map(
+        '00_game', Map(
+            'title', 'My Game',
+            'file', this.workDirectory '\tools\game\game.ahk',
+            'workdir', this.workDirectory '\tools\game',
+            'pid', 0
+        ),
+        '01_version', Map(
+            'title', 'Versions',
+            'file', this.workDirectory '\tools\version\version.ahk',
+            'workdir', this.workDirectory '\tools\version',
+            'pid', 0
+        ),
+        '02_fix', Map(
+            'title', 'Patchs and Fixs',
+            'file', this.workDirectory '\tools\fix\fix.ahk',
+            'workdir', this.workDirectory '\tools\fix',
+            'pid', 0
+        ),
+        '03_lng', Map(
+            'title', 'Interface Language',
+            'file', this.workDirectory '\tools\lng\language.ahk',
+            'workdir', this.workDirectory '\tools\lng\',
+            'pid', 0
+        ),
+        '04_vm', Map(
+            'title', 'Visual Mods',
+            'file', this.workDirectory '\tools\vm\visualmods.ahk',
+            'workdir', this.workDirectory '\tools\vm\',
+            'pid', 0
+        ),
+        '05_dm', Map(
+            'title', 'Data Mods',
+            'file', this.workDirectory '\tools\dm\datamods.ahk',
+            'workdir', this.workDirectory '\tools\dm\',
+            'pid', 0
+        ),
+        '06_rec', Map(
+            'title', 'Recordings',
+            'file', this.workDirectory '\tools\rec\recanalyst.ahk',
+            'workdir', this.workDirectory '\tools\rec\',
+            'pid', 0
+        ),
+        '07_ahk', Map(
+            'title', 'AHK Hotkeys',
+            'file', this.workDirectory '\tools\ahk\ahk.ahk',
+            'workdir', this.workDirectory '\tools\ahk\',
+            'pid', 0
+        ),
+    )
+    ddrawLocation => this.workDirectory '\externals\cnc-ddraw.2'
     ddrawLink => 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/externals/cnc-ddraw.2.7z'
-    ddrawPackage => This.workDirectory '\externals\cnc-ddraw.2.7z'
+    ddrawPackage => this.workDirectory '\externals\cnc-ddraw.2.7z'
     _7zrLink => 'https://www.7-zip.org/a/7zr.exe'
-    _7zrCsle => This.workDirectory '\externals\7za.exe'
+    _7zrCsle => this.workDirectory '\externals\7za.exe'
     _7zrVersion => '25.01'
     _7zrSHA256 => '27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875'
     gameLocation => this.readConfiguration('GameLocation')
@@ -41,19 +76,16 @@ Class Base {
     gameRegLocation => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Age of Empires II AIO'
     userRegLayer => "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"
     machineRegLayer => "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"
-    drsBuild => This.workDirectory '\externals\drsbuild.exe'
-    mgxfix => This.workDirectory '\externals\mgxfix.exe'
-    revealfix => This.workDirectory '\externals\revealfix.exe'
-    lngLoader => This.workDirectory '\externals\language_x1_p1.dll'
-    mmodsDLL => This.workDirectory '\externals\mmods'
+    drsBuild => this.workDirectory '\externals\drsbuild.exe'
+    mgxfix => this.workDirectory '\externals\mgxfix.exe'
+    revealfix => this.workDirectory '\externals\revealfix.exe'
+    lngLoader => this.workDirectory '\externals\language_x1_p1.dll'
+    mmodsDLL => this.workDirectory '\externals\mmods'
     /**
      * Make sure the app base is correctly found
      */
-    __New() {
+    __Startup() {
         OnError(handleError)
-        This.avoidVoobly()
-        This._7zrGet()
-
         handleError(Thrown, Mode) {
             MsgBoxEx(
                 'An error occured:`n`nMessage: ' Thrown.Message .
@@ -62,20 +94,27 @@ Class Base {
                 '`n`nFile: ' Thrown.File .
                 '`n`nLine: ' Thrown.Line .
                 '`n`nStack: ' Thrown.Stack,
-                This.name,
+                'An error occured',
                 0,
                 0x10
             )
             ExitApp()
         }
 
-        If This.HasMethod('ensurePackage') {
-            This.ensurePackage()
+        this.avoidVoobly()
+
+        If !A_IsAdmin {
+            MsgBoxEx('Script must be ran as an administrator!', this.name, , 0x30)
+            ExitApp()
         }
+        this._7zrGet()
+
+        ;If this.HasMethod('ensurePackage') {
+        ;this.ensurePackage()
+        ;}
 
         SetRegView(A_Is64bitOS ? 64 : 32)
     }
-
     /**
      * Gets the default app working directory
      * @returns {string} 
@@ -93,16 +132,16 @@ Class Base {
      */
     _7zrGet() {
         _7zrExist := False
-        If FileExist(This._7zrCsle) {
-            _7zrExist := This._7zrSHA256 == This.hashFile('SHA256', This._7zrCsle)
+        If FileExist(this._7zrCsle) {
+            _7zrExist := this._7zrSHA256 == this.hashFile('SHA256', this._7zrCsle)
         }
         If (!_7zrExist) {
-            Download(This._7zrLink, This._7zrCsle)
+            Download(this._7zrLink, this._7zrCsle)
         }
-        _7zrExist := This._7zrSHA256 == This.hashFile('SHA256', This._7zrCsle)
+        _7zrExist := this._7zrSHA256 == this.hashFile('SHA256', this._7zrCsle)
         If (!_7zrExist) {
             MsgboxEx(
-                'Unable to get the correct 7zr.exe (x86) : 7-Zip console executable v' This._7zrVersion ' from "https://www.7-zip.org/download.html"`nTo fix this, download it manually and place it, into the "externals\" directory.'
+                'Unable to get the correct 7zr.exe (x86) : 7-Zip console executable v' this._7zrVersion ' from "https://www.7-zip.org/download.html"`nTo fix this, download it manually and place it, into the "externals\" directory.'
                 , '7-Zip console executable'
                 , , 0x30
             )
@@ -139,7 +178,7 @@ Class Base {
      * @returns {string} 
      */
     readConfiguration(key) {
-        Return IniRead(This.configuration, This.namespace, key, '')
+        Return IniRead(this.configuration, this.namespace, key, '')
     }
 
     /**
@@ -148,7 +187,7 @@ Class Base {
      * @param value 
      */
     writeConfiguration(key, value) {
-        IniWrite(value, This.configuration, This.namespace, key)
+        IniWrite(value, this.configuration, this.namespace, key)
     }
 
     /**
@@ -172,7 +211,7 @@ Class Base {
             Return 1
         }
 
-        If !This.getConnectedState() {
+        If !this.getConnectedState() {
             MsgboxEx('Make sure you are connected to the internet!', "Can't download!", , 0x30).result
             Return
         }
@@ -180,8 +219,10 @@ Class Base {
         SetTimer(fileWatch, 1000)
         Download(link, file)
         SetTimer(fileWatch, 0)
-        progressBar.value := 100
-        progressText.Text := 'Download complete! "' OutFileName '" [ ' progressBar.value ' % ]...'
+        If progressBar
+            progressBar.value := 100
+        If progressText
+            progressText.Text := 'Download complete! "' OutFileName '" [ ' progressBar.value ' % ]...'
         fileWatch() {
             if FileExist(file) {
                 currentSize := FileGetSize(file, 'M')
@@ -216,30 +257,31 @@ Class Base {
         Static infoGui := 0
         RC := 0
         If hide && informMe {
-            If !infoGui {
-                infoGui := GuiEx('-SysMenu', This.name)
-                infoGui.initiate(0, , 0)
-                infoGui.addGif('xm+90', 'bored.gif')
-                infoGui.AddText(
-                    'BackgroundTrans xm w400 Center cRed',
-                    'Please Wait...`nThe archive is being extracted!')
-                infoGui.SetFont('s9')
-                infoGui.AddText(
-                    'BackgroundTrans xm w400 Center',
-                    '`nPackage: ' package .
-                    '`nDestination: ' destination
-                )
-                infoGui.OnEvent('Close', terminate)
-                terminate(*) {
-                    If ProcessExist(PID) {
-                        ProcessClose(PID)
-                    }
+            If infoGui {
+                infoGui.Destroy()
+            }
+            infoGui := GuiEx('-SysMenu', this.name)
+            infoGui.initiate(0, , 0, 0)
+            infoGui.addGif('xm+90', 'bored.gif')
+            infoGui.AddText(
+                'BackgroundTrans xm w400 Center cRed',
+                'Please Wait...`nThe archive is being extracted!')
+            infoGui.SetFont('s9')
+            cap := infoGui.AddText(
+                'BackgroundTrans xm w400 Center',
+                '`nPackage: ' package .
+                '`nDestination: ' destination
+            )
+            infoGui.OnEvent('Close', terminate)
+            terminate(*) {
+                If ProcessExist(PID) {
+                    ProcessClose(PID)
                 }
             }
             infoGui.showEx(, 1)
         }
-        RC := RunWait('"' This._7zrCsle '" x "' package '" -o"' destination '" -' overwrite, , hide ? 'Hide' : '', &PID)
-        If RC && 'Yes' = MsgBoxEx('An error occured while trying to extract the package`nError code: ' RC '`nDo you wish to exit now?', This.name, 0x4, 0x10).result {
+        RC := RunWait('"' this._7zrCsle '" x "' package '" -o"' destination '" -' overwrite, , hide ? 'Hide' : '', &PID)
+        If RC && 'Yes' = MsgBoxEx('An error occured while trying to extract the package`nError code: ' RC '`nDo you wish to exit now?', this.name, 0x4, 0x10).result {
             ExitApp()
         }
         infoGui.Hide()
@@ -263,12 +305,12 @@ Class Base {
      * Verify is the game folder is correctly selected
      */
     isGameFolderSelected(wnd := 0) {
-        If !Game().isValidGameDirectory(This.gameLocation) {
+        If !Game().isValidGameDirectory(this.gameLocation) {
             If wnd {
                 wnd.Opt('Disabled')
             }
             If 'Yes' = MsgBoxEx('Game is not yet located!, want to select now?', 'Game', 0x4, 0x40).result
-                Try Run(This.tools.game.file)
+                Run(this.tools['00_game']['file'])
             ExitApp()
         }
     }
@@ -277,11 +319,11 @@ Class Base {
      * Ensure the required package is correctly exist
      */
     ensureDDrawPackage() {
-        If !FileExist(This.ddrawPackage) {
-            This.downloadPackage(This.ddrawLink, This.ddrawPackage)
+        If !FileExist(this.ddrawPackage) {
+            this.downloadPackage(this.ddrawLink, this.ddrawPackage)
         }
         If !DirExist(this.ddrawLocation)
-            This.extractPackage(This.ddrawPackage, This.ddrawLocation)
+            this.extractPackage(this.ddrawPackage, this.ddrawLocation)
     }
 
     /**
@@ -289,14 +331,14 @@ Class Base {
      */
     applyDDrawFix(
         locations := [
-            This.gameLocation '\',
-            This.gameLocation '\age2_x1\'
+            this.gameLocation '\',
+            this.gameLocation '\age2_x1\'
         ]
     ) {
-        This.ensureDDrawPackage()
+        ;this.ensureDDrawPackage()
         For location in locations {
             If DirExist(location)
-                DirCopy(This.ddrawLocation, location, 1)
+                DirCopy(this.ddrawLocation, location, 1)
             If FileExist(location '\wndmode.dll') {
                 FileDelete(location '\wndmode.dll')
             }
@@ -304,8 +346,8 @@ Class Base {
                 FileDelete(location '\windmode.dll')
             }
         }
-        This.compatibilityClear([This.userRegLayer, This.machineRegLayer], This.gameLocation '\empires2.exe')
-        This.compatibilityClear([This.userRegLayer, This.machineRegLayer], This.gameLocation '\age2_x1\age2_x1.exe')
+        this.compatibilityClear([this.userRegLayer, this.machineRegLayer], this.gameLocation '\empires2.exe')
+        this.compatibilityClear([this.userRegLayer, this.machineRegLayer], this.gameLocation '\age2_x1\age2_x1.exe')
     }
 
     /**
@@ -317,7 +359,7 @@ Class Base {
     applyUserFix(
         fix := 'None',
         locations := [
-            This.gameLocation '\'
+            this.gameLocation '\'
         ]
     ) {
         If fix = 'None'
@@ -332,8 +374,8 @@ Class Base {
                 FileDelete(location '\age2_x1\ddraw.dll')
             }
         }
-        This.compatibilitySet([This.userRegLayer, This.machineRegLayer], This.gameLocation '\empires2.exe', 'RUNASADMIN WINXPSP3')
-        This.compatibilitySet([This.userRegLayer, This.machineRegLayer], This.gameLocation '\age2_x1\age2_x1.exe', 'RUNASADMIN WINXPSP3')
+        this.compatibilitySet([this.userRegLayer, this.machineRegLayer], this.gameLocation '\empires2.exe', 'RUNASADMIN WINXPSP3')
+        this.compatibilitySet([this.userRegLayer, this.machineRegLayer], this.gameLocation '\age2_x1\age2_x1.exe', 'RUNASADMIN WINXPSP3')
     }
 
     /**
@@ -387,8 +429,8 @@ Class Base {
             If !FileExist(anotherFolder '\' PathFile) {
                 Return 0
             }
-            currentHash := This.hashFile(, A_LoopFileFullPath)
-            foundHash := This.hashFile(, anotherFolder '\' PathFile)
+            currentHash := this.hashFile(, A_LoopFileFullPath)
+            foundHash := this.hashFile(, anotherFolder '\' PathFile)
             If (currentHash != foundHash) {
                 Return 0
             }
@@ -406,8 +448,10 @@ Class Base {
         }
     }
 
-    reloadApp() {
-        Reload()
+    reloadApp() => Reload()
+
+    appUpdateCheck() {
+
     }
 }
 
@@ -415,13 +459,13 @@ Class Base {
 Class Button {
     workDirectory => Base().workDirectory
     default => [
-        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
+        [this.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
     ]
     checkedDisabled => [
-        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF],
+        [this.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF],
         [],
         [],
-        [This.workDirectory '\assets\000_50212_check.bmp', , 0xFFFFFF]
+        [this.workDirectory '\assets\000_50212_check.bmp', , 0xFFFFFF]
     ]
 }
 
@@ -431,54 +475,96 @@ Class Button {
 
 Class GuiEx extends Gui {
     workDirectory => Base().workDirectory
-    backImage => This.workDirectory '\assets\000_50127.bmp'
+    backImage => this.workDirectory '\assets\000_50127.bmp'
     transColor => 0xFFFFFE
-    checkedImage => This.workDirectory '\assets\cb\checked.png'
-    uncheckedImage => This.workDirectory '\assets\cb\unchecked.png'
-    click => This.workDirectory '\assets\wav\50300.wav'
-    initiate(qA := 1, Scrollable := 0, footer := 1) {
-        This.BackColor := 0xFFFFFF
+    checkedImage => this.workDirectory '\assets\cb\checked.png'
+    uncheckedImage => this.workDirectory '\assets\cb\unchecked.png'
+    click => this.workDirectory '\assets\wav\50300.wav'
+    initiate(qA := 1, Scrollable := 0, footer := 1, header := 0) {
+        this.BackColor := 0xFFFFFF
         If qA
-            This.OnEvent('Close', (*) => ExitApp())
-        This.MarginX := This.MarginY := 20
-        This.SetFont('s10 Bold', 'Segoe UI')
-        This.backGroundImage := This.AddPicture('xm-' This.MarginX ' ym-' This.MarginY)
+            this.OnEvent('Close', (*) => ExitApp())
+        this.MarginX := this.MarginY := 20
+        this.SetFont('s10 Bold', 'Segoe UI')
+        this.backGroundImage := this.AddPicture('xm-' this.MarginX ' ym-' this.MarginY)
         If Scrollable {
-            This.scrollableGui()
+            this.scrollableGui()
         }
-        This.footer := footer
+        If header {
+            this.addButtonEx('xm w80', 'Reload', , appReload)
+            this.MarginX := 5
+            this.addButtonEx('xp+85 yp', 'Exit', , appQuit)
+            this.MarginX := 20
+        }
+        this.footer := footer
+        appReload(Ctrl, Info) => Reload()
+        appQuit(Ctrl, Info) => ExitApp()
+        ;OnMessage(0x200, OnMouseMove)
+
+        OnMouseMove(wParam, lParam, msg, hwnd) {
+            MouseGetPos(&x, &y, , &control)
+            Static px := 0, py := 0,
+                WM_SETCURSOR := 0x20,
+                IDC_HAND := 32649,
+                lastControl := '',
+                hCursor := DllCall("LoadCursor", "Ptr", 0, "Int", IDC_HAND, "Ptr")
+            If (control = lastControl) {
+                DllCall("SetCursor", "Ptr", hCursor)
+                Return
+            }
+            If x = px && y = py
+                Return
+            px := x
+            py := y
+            If InStr(control, 'Button') {
+                DllCall("SetCursor", "Ptr", hCursor)
+                lastControl := control
+            }
+        }
     }
     scrollableGui() {
-        vmGuiSB := ScrollBar(This, 200, 400)
-        HotIfWinActive("ahk_id " This.Hwnd)
-        Hotkey("WheelUp", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("WheelDown", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+WheelUp", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+WheelDown", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("Up", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("Down", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+Up", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+Down", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("PgUp", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("PgDn", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+PgUp", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("+PgDn", (*) => vmGuiSB.ScrollMsg((InStr(A_ThisHotkey, "Down") || InStr(A_ThisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("Home", (*) => vmGuiSB.ScrollMsg(6, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
-        Hotkey("End", (*) => vmGuiSB.ScrollMsg(7, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
+        vmGuiSB := ScrollBar(this, 200, 400)
+        HotIfWinActive("ahk_id " this.Hwnd)
+        Hotkey("WheelUp", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("WheelDown", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+WheelUp", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+WheelDown", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("Up", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("Down", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+Up", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+Down", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("PgUp", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("PgDn", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+PgUp", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("+PgDn", (*) => vmGuiSB.ScrollMsg((InStr(A_thisHotkey, "Down") || InStr(A_thisHotkey, "Dn")) ? 3 : 2, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("Home", (*) => vmGuiSB.ScrollMsg(6, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
+        Hotkey("End", (*) => vmGuiSB.ScrollMsg(7, 0, GetKeyState("Shift") ? 0x114 : 0x115, this.Hwnd))
         HotIfWinActive
     }
     showEx(options := '', backImage := 0) {
         If This.footer
             This.addAOEFooter()
-        This.Show(options)
+        this.Show(options)
 
         ; Handling the background image (repeat x, y)
         If backImage {
-            This.GetPos(&X, &Y, &bWidth, &bHeight)
-            This.backGroundImage.Move(0, 0, bWidth, bHeight)
-            This.backGroundImage.Redraw()
+            this.GetPos(&X, &Y, &bWidth, &bHeight)
+            For Control in this {
+                Control.GetPos(&X, &Y, &Width, &Height)
+                Width += X
+                Height += Y
+                If Width > bWidth {
+                    bWidth := Width
+                }
+                If Height > bHeight {
+                    bHeight := Height
+                }
+            }
 
-            fBitmap := Gdip_CreateBitmapFromFile(This.backImage)
+            this.backGroundImage.Move(0, 0, bWidth, bHeight)
+            this.backGroundImage.Redraw()
+
+            fBitmap := Gdip_CreateBitmapFromFile(this.backImage)
             Gdip_GetDimensions(fBitmap, &iWidth, &iHeight)
 
             bBitmap := Gdip_CreateBitmap(bWidth, bHeight)
@@ -496,14 +582,20 @@ Class GuiEx extends Gui {
             }
 
             hBitmap := Gdip_CreateHBITMAPFromBitmap(bBitmap)
-            This.backGroundImage.Value := 'HBITMAP:* ' hBitmap
+            this.backGroundImage.Value := 'HBITMAP:* ' hBitmap
 
             Gdip_DeleteGraphics(G)
             Gdip_DisposeImage(bBitmap)
+
+            If This.footer {
+                This.GetPos(, , &W, &H)
+                This.split.Move(, , W - 60)
+                This.ft.Move(, , W - 188)
+            }
         }
     }
     addButtonEx(options := '', text := '', theme := Button().default, clickCallBack := 0) {
-        b := This.AddButton(options, text)
+        b := this.AddButton(options, text)
         CreateImageButton(
             b,
             0,
@@ -525,15 +617,16 @@ Class GuiEx extends Gui {
             b.Redraw()
         }
 
-        b.OnEvent('Click', (*) => SoundPlay(This.click))
+        b.OnEvent('Click', (*) => SoundPlay(this.click))
 
         If clickCallBack {
             b.OnEvent('Click', clickCallBack)
         }
+
         Return b
     }
     addCheckBoxEx(options := '', text := '', clickCallBack := 0, defaultValue := 1) {
-        T := This.AddText(options ' BackgroundTrans c4C4C4C', text)
+        T := this.AddText(options ' BackgroundTrans c4C4C4C', text)
         T.OnEvent('Click', toggleValue)
         T.GetPos(&X, &Y, &Width, &Height)
 
@@ -543,7 +636,7 @@ Class GuiEx extends Gui {
         T.Move(X + nHeight + 5, Y, Width, Height)
         T.cbValue := 0
 
-        P := This.AddPicture('BackgroundTrans x' X ' y' Y ' h' nHeight ' w' nHeight, This.uncheckedImage)
+        P := this.AddPicture('BackgroundTrans x' X ' y' Y ' h' nHeight ' w' nHeight, this.uncheckedImage)
         P.cbValue := T.cbValue
 
         P.OnEvent('Click', toggleValue)
@@ -556,9 +649,9 @@ Class GuiEx extends Gui {
             P.cbValue := T.cbValue
             If T.cbValue {
                 T.Opt('cBlack')
-                P.Value := This.checkedImage
+                P.Value := this.checkedImage
             } Else {
-                P.Value := This.uncheckedImage
+                P.Value := this.uncheckedImage
                 T.Opt('c4C4C4C')
             }
             T.Redraw()
@@ -584,9 +677,9 @@ Class GuiEx extends Gui {
             P.cbValue := T.cbValue
             If T.cbValue {
                 T.Opt('cBlack')
-                P.Value := This.checkedImage
+                P.Value := this.checkedImage
             } Else {
-                P.Value := This.uncheckedImage
+                P.Value := this.uncheckedImage
                 T.Opt('c4C4C4C')
             }
             T.Redraw()
@@ -603,29 +696,40 @@ Class GuiEx extends Gui {
                 }
             }
         }
-        This.AddText('x' X ' y' Y + Height - This.MarginY ' w1 h1 BackgroundTrans')
+        this.AddText('x' X ' y' Y + Height - this.MarginY ' w1 h1 BackgroundTrans')
         Return T
     }
 
     addPictureEx(options := '', filename := 'blankmod.png', clickcallback := 0) {
         If !FileExist(filename) {
-            filename := This.workDirectory '\assets\' filename
+            filename := this.workDirectory '\assets\' filename
         }
         If !FileExist(filename) {
             filename := ''
         }
-        P := This.AddPicture(options ' BackgroundTrans', filename)
+        P := this.AddPicture(options ' BackgroundTrans', filename)
         if clickcallback {
             P.OnEvent('click', clickcallback)
+        }
+
+        P.DefineProp('ValueEx', { Set: ValueEx })
+        ValueEx(ctrl, value) {
+            If !FileExist(value) {
+                value := this.workDirectory '\assets\' value
+            }
+            If !FileExist(value) {
+                value := ''
+            }
+            ctrl.Value := value
         }
         Return P
     }
 
     addGif(options := '', gif := '') {
         If !FileExist(gif) {
-            gif := This.workDirectory '\assets\' gif
+            gif := this.workDirectory '\assets\' gif
         }
-        pic := This.addPictureEx(options, gif)
+        pic := this.addPictureEx(options, gif)
         gif := ImageShow(gif, , [0, 0], 0x40000000 | 0x10000000 | 0x8000000, , pic.Hwnd)
         Return pic
     }
@@ -634,30 +738,35 @@ Class GuiEx extends Gui {
      * Add a footer that displays some (important) info
      */
     addAOEFooter() {
-        This.SetFont('s9')
-        This.addText('xm w420 0x10')
-        This.MarginY := 0
-        This.addPictureEx('xm', 'aok_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\empires2.exe') ? Run(gameLocation '\empires2.exe', gameLocation) : '')
-        This.addPictureEx('yp', 'aoc_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x1.exe') ? Run(gameLocation '\age2_x1\age2_x1.exe', gameLocation) : '')
-        This.addPictureEx('yp', 'fe_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : '')
+        this.SetFont('s10')
+        This.split := this.addText('xm w420 0x10')
+        this.MarginY := 0
+        this.addPictureEx('xm', 'aok_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\empires2.exe') ? Run(gameLocation '\empires2.exe', gameLocation) : '')
+        this.addPictureEx('yp', 'aoc_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x1.exe') ? Run(gameLocation '\age2_x1\age2_x1.exe', gameLocation) : '')
+        this.addPictureEx('yp', 'fe_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : '')
         gameLocation := Base().gameLocation
         If Game().isValidGameDirectory(gameLocation)
-            ft := This.AddEdit('BackgroundBlack yp+3 x+20 cWhite w280 -E0x200 r1', Base().gameLocation)
-        Else ft := This.AddEdit('BackgroundBlack yp+3 x+20 cRed w280 -E0x200 r1', Base().gameLocation)
-        This.MarginY := 5
+            This.ft := this.AddEdit('BackgroundBlack yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
+        Else This.ft := this.AddEdit('Backgroundff0000 yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
+        this.MarginY := 20
     }
 }
 
 Class MsgBoxEx {
     workDirectory => Base().workDirectory
+
     errorIcon => this.workDirectory '\assets\error.png'
     errorSound => this.workDirectory '\assets\mp3\error.mp3'
+
     questionIcon => this.workDirectory '\assets\question.png'
     questionSound => this.workDirectory '\assets\mp3\question.mp3'
+
     exclamationIcon => this.workDirectory '\assets\exclamation.png'
     exclamationSound => this.workDirectory '\assets\mp3\exclamation.mp3'
+
     infoIcon => this.workDirectory '\assets\info.png'
     infoSound => this.workDirectory '\assets\mp3\info.mp3'
+
     btnWidth => 100
     /**
      * App specific message box theme
@@ -668,25 +777,27 @@ Class MsgBoxEx {
      * @param {number} TimeOut 
      */
     __New(Text := '', Title := A_ScriptName, Function := 0, Icon := 0, TimeOut := 0, minWidth := 400) {
-        This.msgGui := GuiEx(, Title)
-        This.msgGui.initiate(0, , 0)
-        This.msgGui.AddText('x0 y0 h1 BackgroundTrans w' minWidth)
-        This.hIcon := 0
+
+        this.msgGui := GuiEx(, Title)
+        this.msgGui.initiate(0, , 0)
+        this.msgGui.AddText('x0 y0 h1 BackgroundTrans w' minWidth)
+        this.hIcon := 0
+
         Switch Icon {
             Case 16:
-                This.hIcon := This.msgGui.AddPicture('xm w48 h48 BackgroundTrans', This.errorIcon)
-                SoundPlay(This.errorSound)
+                this.hIcon := this.msgGui.AddPicture('xm w48 h48 BackgroundTrans', this.errorIcon)
+                SoundPlay(this.errorSound)
             Case 32:
-                This.hIcon := This.msgGui.AddPicture('xm w48 h48 BackgroundTrans', This.questionIcon)
-                SoundPlay(This.questionSound)
+                this.hIcon := this.msgGui.AddPicture('xm w48 h48 BackgroundTrans', this.questionIcon)
+                SoundPlay(this.questionSound)
             Case 48:
-                This.hIcon := This.msgGui.AddPicture('xm w48 h48 BackgroundTrans', This.exclamationIcon)
-                SoundPlay(This.exclamationSound)
+                this.hIcon := this.msgGui.AddPicture('xm w48 h48 BackgroundTrans', this.exclamationIcon)
+                SoundPlay(this.exclamationSound)
             Case 64:
-                This.hIcon := This.msgGui.AddPicture('xm w48 h48 BackgroundTrans', This.infoIcon)
-                SoundPlay(This.infoSound)
+                this.hIcon := this.msgGui.AddPicture('xm w48 h48 BackgroundTrans', this.infoIcon)
+                SoundPlay(this.infoSound)
         }
-
+        ;msgbox Text
         If Text = '' {
             Switch Function {
                 Default: Text := 'Press OK to continue'
@@ -696,57 +807,57 @@ Class MsgBoxEx {
             }
         }
 
-        This.hText := This.msgGui.AddEdit('xm Center ReadOnly BackgroundE1B15A -E0x200 -VScroll Border', '`n' Text '`n`n')
+        this.hText := this.msgGui.AddEdit('xm Center ReadOnly BackgroundE1B15A -E0x200 -VScroll Border', '`n' Text '`n`n')
 
         Switch Function {
             Case 0:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'OK', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'OK', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 1:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'OK', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Cancel', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'OK', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Cancel', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 2:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'Abort', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Retry', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Ignore', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'Abort', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Retry', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Ignore', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 3:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'Yes', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'No', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Cancel', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'Yes', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'No', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Cancel', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 4:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'Yes', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'No', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'Yes', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'No', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 5:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'Retry', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Cancel', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'Retry', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Cancel', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
             Case 6:
-                This.msgGui.addButtonEx('xm w' This.btnWidth, 'Cancel', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Try Again', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Continue', , takeAction)
-                This.msgGui.addButtonEx('yp w' This.btnWidth, 'Copy Message', , takeAction).Focus()
+                this.msgGui.addButtonEx('xm w' this.btnWidth, 'Cancel', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Try Again', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Continue', , takeAction)
+                this.msgGui.addButtonEx('yp w' this.btnWidth, 'Copy Message', , takeAction).Focus()
         }
 
-        This.msgGui.showEx(, 1)
+        this.msgGui.showEx(, 1)
         centerControls()
-        This.result := ''
+        this.result := ''
 
         If TimeOut {
-            This.hText.Value := '`n' text '`nQuitting in ' (TimeOut) ' second' ((TimeOut > 1) ? 's' : '')
+            this.hText.Value := '`n' text '`nQuitting in ' (TimeOut) ' second' ((TimeOut > 1) ? 's' : '')
             SetTimer(countdown, 1000)
             countdown() {
-                This.hText.Value := '`n' text '`nQuitting in ' (--TimeOut) ' second' ((TimeOut > 1) ? 's' : '')
+                this.hText.Value := '`n' text '`nQuitting in ' (--TimeOut) ' second' ((TimeOut > 1) ? 's' : '')
             }
-            WinWaitClose(This.msgGui, , TimeOut)
-        } Else WinWaitClose(This.msgGui)
+            WinWaitClose(this.msgGui, , TimeOut)
+        } Else WinWaitClose(this.msgGui)
 
         SetTimer(countdown, 0)
-        If This.msgGui
-            This.msgGui.Destroy()
+        If this.msgGui
+            this.msgGui.Destroy()
 
         /**
          * Take action according to the result
@@ -755,36 +866,36 @@ Class MsgBoxEx {
          * @returns {void} 
          */
         takeAction(Ctrl, Info) {
-            This.result := Ctrl.Text
-            If This.result = 'Copy Message' {
-                A_Clipboard := This.hText.Value
+            this.result := Ctrl.Text
+            If this.result = 'Copy Message' {
+                A_Clipboard := this.hText.Value
                 Return
             }
             SetTimer(countdown, 0)
-            If This.msgGui
-                This.msgGui.Destroy()
+            If this.msgGui
+                this.msgGui.Destroy()
         }
 
         centerControls() {
-            This.msgGui.GetClientPos(&X, &Y, &Width, &Height)
-            If This.hIcon {
-                This.hIcon.GetPos(&cX, &cY, &cWidth, &cHeight)
-                This.hIcon.Move((Width - cWidth) // 2)
+            this.msgGui.GetClientPos(&X, &Y, &Width, &Height)
+            If this.hIcon {
+                this.hIcon.GetPos(&cX, &cY, &cWidth, &cHeight)
+                this.hIcon.Move((Width - cWidth) // 2)
             }
-            This.hText.GetPos(&cX, &cY, &cWidth, &cHeight)
+            this.hText.GetPos(&cX, &cY, &cWidth, &cHeight)
             cWidth := cWidth > minWidth ? cWidth : minWidth
-            This.hText.Move((Width - cWidth) // 2, , cWidth)
+            this.hText.Move((Width - cWidth) // 2, , cWidth)
 
             buttons := []
-            For Obj in This.msgGui {
+            For Obj in this.msgGui {
                 If !InStr(Type(Obj), 'Gui.Button')
                     Continue
                 buttons.Push(Obj)
             }
-            X := buttons.Length * This.btnWidth + (buttons.Length - 1) * This.msgGui.MarginX
+            X := buttons.Length * this.btnWidth + (buttons.Length - 1) * this.msgGui.MarginX
             X := (Width - X) // 2
             For btn in buttons {
-                btn.Move(X + (A_Index - 1) * (This.msgGui.MarginX + This.btnWidth))
+                btn.Move(X + (A_Index - 1) * (this.msgGui.MarginX + this.btnWidth))
                 btn.Redraw()
             }
         }
@@ -793,8 +904,8 @@ Class MsgBoxEx {
 
 Class Game extends Base {
     name => 'My Game'
-    gamePackage => This.workDirectory '\tools\Game\Age of Empires II.7z'
-    addShortcuts => This.readConfiguration('AddShortcuts')
+    gamePackage => this.workDirectory '\tools\Game\Age of Empires II.7z'
+    addShortcuts => this.readConfiguration('AddShortcuts')
     /**
      * Check if a location is really an aoe ii game
      * @param Location 
@@ -836,22 +947,22 @@ Class Version extends Base {
             ]
         )
     )
-    versionLocation => This.workDirectory '\tools\Version'
-    versionTool => This.versionLocation '\version.ahk'
+    versionLocation => this.workDirectory '\tools\Version'
+    versionTool => this.versionLocation '\version.ahk'
     packageLink => 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/Version/Version.7z'
     packageName => 'Version.7z'
-    packageLocation => This.workDirectory '\tools\Version'
-    packagePath => This.packageLocation '\' This.packageName
+    packageLocation => this.workDirectory '\tools\Version'
+    packagePath => this.packageLocation '\' this.packageName
 
     /**
      * Ensure the required package is correctly exist
      */
     ensurePackage() {
-        If !FileExist(This.packagePath) {
-            This.downloadPackage(This.packageLink, This.packagePath)
-            This.extractPackage(This.packagePath, This.packageLocation)
+        If !FileExist(this.packagePath) {
+            this.downloadPackage(this.packageLink, this.packagePath)
+            this.extractPackage(this.packagePath, this.packageLocation)
         }
-        ;This.extractPackage(This.packagePath, This.packageLocation, 0, , 'aos')
+        ;this.extractPackage(this.packagePath, this.packageLocation, 0, , 'aos')
     }
 
     /**
@@ -895,45 +1006,45 @@ Class Version extends Base {
         )
         lookFor := 'interfac.drs'
 
-        If FileExist(This.gameLocation '\empires2.exe') {
-            empires2 := FileOpen(This.gameLocation '\empires2.exe', 'r')
+        If FileExist(this.gameLocation '\empires2.exe') {
+            empires2 := FileOpen(this.gameLocation '\empires2.exe', 'r')
 
             ; 2.0
-            If This.readString(empires2, 2479120, 12) = lookFor {
+            If this.readString(empires2, 2479120, 12) = lookFor {
                 versions['aok'] := '2.0'
             }
 
             ; 2.0a
-            If This.readString(empires2, 2475120, 12) = lookFor {
+            If this.readString(empires2, 2475120, 12) = lookFor {
                 versions['aok'] := '2.0a'
             }
 
             ; 2.0b
             If versions['aok'] = '2.0a'
-                && FileExist(This.gameLocation '\on.ini')
-                && FileRead(This.gameLocation '\on.ini') = 'on' {
+                && FileExist(this.gameLocation '\on.ini')
+                && FileRead(this.gameLocation '\on.ini') = 'on' {
                     versions['aok'] := '2.0b'
             }
             empires2.Close()
         }
 
-        If FileExist(This.gameLocation '\age2_x1\age2_x1.exe') {
-            age2_x1 := FileOpen(This.gameLocation '\age2_x1\age2_x1.exe', 'r')
+        If FileExist(this.gameLocation '\age2_x1\age2_x1.exe') {
+            age2_x1 := FileOpen(this.gameLocation '\age2_x1\age2_x1.exe', 'r')
 
             ; 1.0
-            If This.readString(age2_x1, 2604688, 12) = lookFor {
+            If this.readString(age2_x1, 2604688, 12) = lookFor {
                 versions['aoc'] := '1.0'
             }
 
             ; 1.0c
-            If This.readString(age2_x1, 2551448, 12) = lookFor {
+            If this.readString(age2_x1, 2551448, 12) = lookFor {
                 versions['aoc'] := '1.0c'
             }
 
             ; 1.0e
             If versions['aoc'] = '1.0c'
-                && FileExist(This.gameLocation '\age2_x1\on.ini')
-                && FileRead(This.gameLocation '\age2_x1\on.ini') = 'onon' {
+                && FileExist(this.gameLocation '\age2_x1\on.ini')
+                && FileRead(this.gameLocation '\age2_x1\on.ini') = 'onon' {
                     versions['aoc'] := '1.0e'
             }
 
@@ -949,8 +1060,8 @@ Class Version extends Base {
             age2_x1.Close()
         }
 
-        If FileExist(This.gameLocation '\age2_x1\age2_x2.exe') {
-            age2_x2 := FileOpen(This.gameLocation '\age2_x1\age2_x2.exe', 'r')
+        If FileExist(this.gameLocation '\age2_x1\age2_x2.exe') {
+            age2_x2 := FileOpen(this.gameLocation '\age2_x1\age2_x2.exe', 'r')
             age2_x2.Pos := 278
             ; 2.2
             If age2_x2.ReadChar() = 39 {
@@ -958,7 +1069,6 @@ Class Version extends Base {
             }
             age2_x2.Close()
         }
-
         Return versions
     }
     /**
@@ -978,29 +1088,46 @@ Class Version extends Base {
         Return str
     }
 
+    availableVersions() {
+        aver := Map(
+            'aok', [],
+            'aoc', [],
+            'fe', []
+        )
+        Loop Files, this.versionLocation '\aok\*', 'D' {
+            aver['aok'].Push(A_LoopFileName)
+        }
+        Loop Files, this.versionLocation '\aoc\*', 'D' {
+            aver['aoc'].Push(A_LoopFileName)
+        }
+        Loop Files, this.versionLocation '\fe\*', 'D' {
+            aver['fe'].Push(A_LoopFileName)
+        }
+        Return aver
+    }
 }
 
 Class FixPatch extends Base {
     name => 'Game Patchs/Fixs'
-    fixLocation => This.workDirectory '\tools\fix'
-    fixTool => This.fixLocation '\fix.ahk'
-    fixs => This.getFixs()
+    fixLocation => this.workDirectory '\tools\fix'
+    fixTool => this.fixLocation '\fix.ahk'
+    fixs => this.getFixs()
     fixRegKey => 'HKEY_CURRENT_USER\SOFTWARE\Microsoft\Microsoft Games\Age of Empires'
     fixRegName => 'Aoe2Patch'
     packageLink => 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/fix/Fix.7z'
-    packageLocation => This.workDirectory '\tools\fix'
+    packageLocation => this.workDirectory '\tools\fix'
     packageName => 'Fix.7z'
-    packagePath => This.packageLocation '\' This.packageName
+    packagePath => this.packageLocation '\' this.packageName
 
     /**
      * Ensure the required package is correctly exist
      */
     ensurePackage() {
-        If !FileExist(This.packagePath) {
-            This.downloadPackage(This.packageLink, This.packagePath)
-            This.extractPackage(This.packagePath, This.packageLocation)
+        If !FileExist(this.packagePath) {
+            this.downloadPackage(this.packageLink, this.packagePath)
+            this.extractPackage(this.packagePath, this.packageLocation)
         }
-        ;This.extractPackage(This.packagePath, This.fixLocation, 1, , 'aos')
+        ;this.extractPackage(this.packagePath, this.fixLocation, 1, , 'aos')
     }
 
     /**
@@ -1009,14 +1136,14 @@ Class FixPatch extends Base {
      */
     getFixs() {
         F := ['None']
-        Loop Files, This.fixLocation '\*', 'D' {
+        Loop Files, this.fixLocation '\*', 'D' {
             F.Push(A_LoopFileName)
         }
         Return F
     }
 
     fixExist(name) {
-        Return DirExist(This.fixLocation '\' name)
+        Return DirExist(this.fixLocation '\' name)
     }
 
     /**
@@ -1033,7 +1160,6 @@ Class FixPatch extends Base {
          * @returns {void} 
          */
         Quit() => ExitApp()
-
     }
 }
 
@@ -1044,80 +1170,133 @@ Class VisualMod extends Base {
         "int", "interfac.drs",
         "ter", "terrain.drs"
     )
-    vmLocation => This.workDirectory '\tools\vm\VisualMods'
-    packageLocation => This.workDirectory '\tools\vm'
+    vmLocation => this.workDirectory '\tools\vm\VisualMods'
+    packageLocation => this.workDirectory '\tools\vm'
     packageLink => 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/vm/VisualMods.7z'
     packageName => 'VisualMods.7z'
-    packagePath => This.packageLocation '\' This.packageName
+    packagePath => this.packageLocation '\' this.packageName
 
     /**
      * Ensure the required package is correctly exist
      */
     ensurePackage() {
-        If !FileExist(This.packagePath) {
-            This.downloadPackage(This.packageLink, This.packagePath)
+        If !FileExist(this.packagePath) {
+            this.downloadPackage(this.packageLink, this.packagePath)
         }
-        If !DirExist(This.vmLocation)
-            This.extractPackage(This.packagePath, This.packageLocation)
+        If !DirExist(this.vmLocation)
+            this.extractPackage(this.packagePath, this.packageLocation)
     }
 }
 
 Class DataMod extends Base {
     name => 'Data Mods'
-    dmLocation => This.workDirectory '\tools\dm'
-    packageLocation => This.workDirectory '\tools\dm'
+    dmLocation => this.workDirectory '\tools\dm'
+    packageLocation => this.workDirectory '\tools\dm'
     dmPackages => Map(
         'The Conquerors Updated', Map(
             'type', 'xml',
             'gameName', 'The Conquerors Updated',
             'gameLinker', 'age2_x1_up',
             'packageName', 'DEBalance-6.1.2.7z',
-            'packagePath', This.packageLocation '\DEBalance-6.1.2.7z',
+            'packagePath', this.packageLocation '\DEBalance-6.1.2.7z',
             'packageVersion', '6.1.2',
             'packageSizeMB', '81',
             'packageLink', 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/dm/DEBalance-6.1.2.7z',
             'description', "by _everaoc_`n'The Conquerors Updated' mod with shared allies' line of sight.",
-            'thumbnail', This.workDirectory '\assets\DE Balance.png'
+            'thumbnail', this.workDirectory '\assets\DE Balance.png'
         ),
         'WololoKingdoms', Map(
             'type', 'xml',
             'gameName', 'WololoKingdoms',
             'gameLinker', 'age2_x1_wk',
             'packageName', 'WololoKingdoms-5.8.1.7z',
-            'packagePath', This.packageLocation '\WololoKingdoms-5.8.1.7z',
+            'packagePath', this.packageLocation '\WololoKingdoms-5.8.1.7z',
             'packageVersion', '5.8.1',
             'packageSizeMB', '225',
             'packageLink', 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/dm/WololoKingdoms-5.8.1.7z',
             'description', "by Tails8521, Jineapple, TriRem, TWest\nPlay the HD Expansions on Voobly.",
-            'thumbnail', This.workDirectory '\assets\WololoKingdoms.png'
+            'thumbnail', this.workDirectory '\assets\WololoKingdoms.png'
         ),
         'Elemental TD', Map(
             'type', 'xml',
             'gameName', 'Elemental TD',
             'gameLinker', 'age2_x1_e_td',
             'packageName', 'ElementalTD-2.02.7z',
-            'packagePath', This.packageLocation '\ElementalTD-2.02.7z',
+            'packagePath', this.packageLocation '\ElementalTD-2.02.7z',
             'packageVersion', '2.02',
             'packageSizeMB', '46',
             'packageLink', 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/dm/ElementalTD-2.02.7z',
             'description', "by BinaryPotka`nNew 2023 TD mod with Elemental Towers.",
-            'thumbnail', This.workDirectory '\assets\Elemental TD.png'
+            'thumbnail', this.workDirectory '\assets\Elemental TD.png'
         ),
         'Sheep vs Wolf 3', Map(
             'type', 'xml',
             'gameName', 'Sheep vs Wolf 3',
             'gameLinker', 'age2_x1_svw3',
             'packageName', 'SheepVSWolf-3.0.7.7z',
-            'packagePath', This.packageLocation '\SheepVSWolf-3.0.7.7z',
+            'packagePath', this.packageLocation '\SheepVSWolf-3.0.7.7z',
             'packageVersion', '3.0.7',
             'packageSizeMB', '13.2',
             'packageLink', 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/dm/SheepVSWolf-3.0.7.7z',
             'description', "by Gallas`nSheep vs Wolf 3 is a random map based hunter / prey game with unique UP v1.5 RC mechanics. Hide in forest and build a fortress, or hunt for animals and search for Sheep as the Wolf!.",
-            'thumbnail', This.workDirectory '\assets\svsw3mini.jpg'
+            'thumbnail', this.workDirectory '\assets\svsw3mini.jpg'
         )
     )
 }
 
 Class Language extends Base {
+    name => 'Game Interface Language'
+    lngLocation => this.workDirectory '\tools\lng\Language'
+    packageName => 'Language.7z'
+    packagePath => this.packageLocation '\' this.packageName
+    packageLocation => this.workDirectory '\tools\lng'
+    packageLink => 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/tools/lng/Language.7z'
+    /**
+     * Ensure the required package is correctly exist
+     */
+    ensurePackage() {
+        If !FileExist(this.packagePath) {
+            this.downloadPackage(this.packageLink, this.packagePath)
+        }
+        If !DirExist(this.lngLocation)
+            this.extractPackage(this.packagePath, this.lngLocation)
+    }
 
+    /**
+     * Check if it a command line call
+     */
+    isCommandLineCall(options) {
+        If A_Args.Length {
+            If options.callback.Call(A_Args[1], '')
+                MsgBoxEx(A_Args[1] ' The language is applied successfully!', options.wnd.Title, , 0x40, 2)
+            Quit()
+        }
+        /**
+         * Exit the app from a commandline call
+         * @returns {void} 
+         */
+        Quit() => ExitApp()
+    }
+}
+
+Class AHK extends Base {
+    name => 'Custom Shortcuts'
+    ahkLocation => this.workDirectory '\tools\ahk'
+    hotkeys => this.workDirectory '\tools\ahk\hotkeys.json'
+}
+
+Class Recanalyst extends Base {
+    name => 'Age of Empires II: Record Analyzer'
+    php => this.workDirectory '\tools\rec\php\php.exe'
+    ra => this.workDirectory '\tools\rec\recanalyst'
+    /**
+     * Start the php server and return it PID
+     * @returns {number} 
+     */
+    initiateServer(parent) {
+        Run(Format('"{}" -S localhost:8000 -t "{}"', this.php, this.ra), , 'Hide', &phpPid)
+        SplitPath(this.php, &phpexe)
+        ProcessWait(phpexe)
+        Run(Format('"{}\tools\rec\closephp.ahk" {} {}', this.workDirectory, ProcessExist(), phpPid))
+    }
 }

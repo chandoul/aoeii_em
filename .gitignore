@@ -9,3 +9,11 @@ tools/fix/fix v*
 tests/
 tools/vm/visualmods/
 tools/vm/vm.ahk
+tools/lng/Language
+tools/rec/browser
+tools/rec/php
+tools/rec/recanalyst
+assets/
+externals/
+release/
+screenshots/

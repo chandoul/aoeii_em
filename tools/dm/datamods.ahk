@@ -13,7 +13,7 @@ dmGui := GuiEx(, dmapp.name)
 dmGui.initiate()
 
 dmGui.AddText('xm w200 BackgroundTrans', 'Search')
-search := dmGui.AddEdit('Border -E0x200 w200')
+search := dmGui.AddEdit('BackgroundBlack cWhite -E0x200 w200')
 search.OnEvent('Change', quickSearch)
 
 modsList := dmGui.AddListBox('wp r20 BackgroundE1B15A -E0x200')

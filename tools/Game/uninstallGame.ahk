@@ -14,7 +14,7 @@ If A_Args.Length < 1 || !gamapp.isValidGameDirectory(location := A_Args[1]) {
 uninstallGui := GuiEx(, gamapp.name)
 uninstallGui.initiate()
 
-uninstallGui.AddButtonEx(
+unintall := uninstallGui.AddButtonEx(
     'xm w300 h150',
     'By clicking on this button you agree to delete your game forever'
     . '`n`nGame location:`n"' location '"'
@@ -23,6 +23,9 @@ uninstallGui.AddButtonEx(
     UninstallGame
 )
 uninstallGui.showEx(, 1)
+uninstallGui.GetPos(, , &W, &H)
+unintall.Move(, , W - 60)
+unintall.TextEx := unintall.Text
 
 UninstallGame(Ctrl, Info) {
     If InStr(Ctrl.Text, 'completed') {

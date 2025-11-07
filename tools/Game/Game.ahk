@@ -138,6 +138,7 @@ setDirectoryGR(Ctrl, Info) {
 writeNewLocation(Location) {
     Location := StrUpper(Location)
     gameapp.writeConfiguration('GameLocation', Location)
+    Run(gameapp.workDirectory '\tools\' gameapp.ahknamespace)
     gameapp.reloadApp()
 }
 

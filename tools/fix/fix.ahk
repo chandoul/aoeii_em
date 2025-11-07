@@ -40,8 +40,8 @@ waterAnimation(Ctrl, Info) {
 }
 
 ; Advanced interface
-resInt := fixGui.addCheckBoxEx(, 'Show villagers count on each resource`nShow civilizations upgrades levels`nShow civlization next to score names', resourceInterface)
-If RegRead(fixRegKey, 'Aoe2Patch', 0) = 1 {
+resInt := fixGui.addCheckBoxEx(, 'Show villagers count on each resource`nShow civilizations upgrades levels`nShow civlization next to score names', resourceInterface, 2)
+If RegRead(fixRegKey, 'Aoe2Patch', 0) = 2 {
     resInt.Checked := 1
 }
 resourceInterface(Ctrl, Info) {

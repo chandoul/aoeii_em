@@ -22,9 +22,12 @@ versions := Map(
     'Version', []
 )
 
+avVerions := verapp.availableVersions()
+
 availableVersions['aok'] := Map()
-Loop Files, verapp.versionLocation '\aok\*', 'D' {
-    H := versionGui.AddButtonEx('w150', AOK := A_LoopFileName, Button().checkedDisabled, applyVersion)
+
+For AOK in avVerions['aok'] {
+    H := versionGui.AddButtonEx('w150', AOK, Button().checkedDisabled, applyVersion)
     availableVersions['aok'][H] := 1
     versions['Version'].Push(H)
 }
@@ -34,8 +37,8 @@ versionGui.AddPictureEx('xp+59 yp+30', 'aoc.png', launchGame)
 versionGui.AddText('BackgroundTrans xp-59 yp+35 w1 h1')
 
 availableVersions['aoc'] := Map()
-Loop Files, verapp.versionLocation '\aoc\*', 'D' {
-    H := versionGui.addButtonEx('w150', AOC := A_LoopFileName, Button().checkedDisabled, applyVersion)
+For AOC in avVerions['aoc'] {
+    H := versionGui.addButtonEx('w150', AOC, Button().checkedDisabled, applyVersion)
     availableVersions['aoc'][H] := 2
     versions['Version'].Push(H)
 }
@@ -45,14 +48,14 @@ versionGui.AddPictureEx('xp+59 yp+30', 'fe.png', launchGame)
 versionGui.AddText('BackgroundTrans xp-59 yp+35 w1 h1')
 
 availableVersions['fe'] := Map()
-Loop Files, verapp.versionLocation '\fe\*', 'D' {
-    H := versionGui.addButtonEx('w150', FE := A_LoopFileName, Button().checkedDisabled, applyVersion)
+For FE in avVerions['fe'] {
+    H := versionGui.addButtonEx('w150', FE, Button().checkedDisabled, applyVersion)
     availableVersions['fe'][H] := 3
     versions['Version'].Push(H)
 }
 
 versionGui.SetFont('s9')
-versionGui.AddText('xm+550 ym+85 BackgroundTrans', 'Options to apply after each change:').SetFont('Bold')
+versionGui.AddText('xm BackgroundTrans', 'Options to apply after each change:').SetFont('Bold')
 versionGui.MarginY := 10
 
 autoFix := versionGui.addCheckBoxEx(, 'Auto enable a fix:', patchEnable)
@@ -134,7 +137,7 @@ applyVersion(ctrl, info) {
         cleansUp(FGame)
         applyReqVersion(ctrl, FGame)
         If autoFix.cbValue && fixChoice.Text != ''
-            Try RunWait('"' fixapp.fixTool '" "' fixChoice.Text '"')
+            Try RunWait('"' fixapp.tools['02_fix']['file'] '" "' fixChoice.Text '"')
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
