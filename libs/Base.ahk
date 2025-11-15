@@ -1221,9 +1221,9 @@ Class VisualMod extends Base {
         "ter", "terrain.drs"
     )
     vmLocation => This.workDirectory '\tools\vm'
-    packageLocation => This.workDirectory '\tools\vm'
+    packageLocation => This.workDirectory '\packages'
     packageLink => 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/VisualMods.7z'
-    packageName => 'visualmods.7z'
+    packageName => 'VisualMods.7z'
     packagePath => This.packageLocation '\' This.packageName
 
     /**
