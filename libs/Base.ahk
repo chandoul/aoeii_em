@@ -1339,10 +1339,10 @@ Class Recanalyst extends Base {
     php => This.workDirectory '\tools\rec\php\php.exe'
     ra => This.workDirectory '\tools\rec\recanalyst'
     recLocation => This.workDirectory '\tools\rec'
-    packageName => 'rec.7z'
-    packagePath => This.packageLocation '\' This.packageName
+    packageName => 'Rec.7z'
     packageLocation => This.workDirectory '\packages'
-    packageLink => 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/rec.7z'
+    packagePath => This.packageLocation '\' This.packageName
+    packageLink => 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/Rec.7z'
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
             This.downloadPackage(This.packageLink, This.packagePath)
