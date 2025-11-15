@@ -481,11 +481,9 @@ Class Base {
         currversion := StrReplace(This.version, '.')
         if updversion > currversion && 'Yes' = MsgBoxEx('New update is found!`n`n' This.name ' v' version.1 ' is now available`n`nUpdate now?', 'New update', 0x4, 0x40).result {
             This.downloadPackage('https://github.com/chandoul/aoeii_em/raw/refs/heads/master/release/aoeii_em_setup_latest.exe', 'aoeii_em_setup_latest.exe', , , , 1)
-            Run('aoeii_em_setup_latest.exe')
+            Try Run('aoeii_em_setup_latest.exe')
             ExitApp()
         }
-        MsgBoxEx('You are up to date!, no newer versions found.', 'Update Check')
-
     }
 
     rawTextContent(link) {
