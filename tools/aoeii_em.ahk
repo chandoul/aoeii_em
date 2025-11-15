@@ -128,6 +128,7 @@ If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe') {
 updateCheck(*) {
     appUpdate.TextEx := 'Checking...'
     aoeiiapp.appUpdateCheck()
+    appUpdate.TextEx := 'Check for updates'
 }
 
 performGameAnalyze(*) {

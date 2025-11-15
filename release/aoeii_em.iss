@@ -37,7 +37,7 @@ Source: {#SHORTCUT_ICON}; DestDir: "{app}\resources"; Flags: ignoreversion
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs
 Source: "..\externals\*"; DestDir: "{app}\externals"; Flags: ignoreversion recursesubdirs
 Source: "..\libs\*"; DestDir: "{app}\libs"; Flags: ignoreversion recursesubdirs
-Source: "..\screenshots\*"; DestDir: "{app}\libs"; Flags: ignoreversion recursesubdirs
+Source: "..\screenshots\*"; DestDir: "{app}\screenshots"; Flags: ignoreversion recursesubdirs
 // autohotkey
 Source: "..\tools\ahk\ahk.ahk"; DestDir: "{app}\tools\ahk"; Flags: ignoreversion
 Source: "..\tools\ahk\default.json"; DestDir: "{app}\tools\ahk"; Flags: ignoreversion
