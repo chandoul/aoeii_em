@@ -212,16 +212,26 @@ Class Base {
 
         If !infoGui {
             infoGui := GuiEx(, 'Package Download')
-            infoGui.initiate(0, , 0)
-            infoText := infoGui.AddText('BackgroundTrans xm w300 Center')
+            infoGui.initiate(, , 0)
+            infoText := infoGui.AddText('BackgroundTrans xm w300 Center', '...')
             InfoBar := infoGui.AddProgress('-smooth wp h18')
-
         }
 
         If !progressText && !progressBar {
             progressText := infoText
             progressBar := InfoBar
             infoGui.ShowEx(, 1)
+        }
+
+        if !progressText.Visible {
+            progressText.Visible := 1
+            progressBar.Visible := 1
+        }
+
+        If !fileSize {
+            fileSize := This.fileSizeLink(link)
+            fileSize /= 1024
+            fileSize /= 1024
         }
 
         SplitPath(file, &OutFileName)
@@ -232,19 +242,12 @@ Class Base {
             progressBar.value := 100
         If progressText
             progressText.Text := 'Download complete! "' OutFileName '" [ ' progressBar.value ' % ]...'
-
-        If !progressText && !progressBar {
-            infoGui.Hide()
-        }
+        infoGui.Hide()
 
         fileWatch() {
             if FileExist(file) {
                 currentSize := FileGetSize(file, 'M')
                 If fileSize {
-                    if !progressText.Visible {
-                        progressText.Visible := 1
-                        progressBar.Visible := 1
-                    }
                     progress := Round(currentSize / fileSize * 100, 2)
                     if progressText {
                         progressText.Text := 'Downloading "' OutFileName '" [ ' progress ' % ]...'
@@ -295,8 +298,14 @@ Class Base {
             infoGui.showEx(, 1)
         }
         RC := RunWait('"' This._7zrCsle '" x "' package '" -o"' destination '" -' overwrite, , hide ? 'Hide' : '', &PID)
-        If RC && 'Yes' = MsgBoxEx('An error occured while trying to extract the package`nError code: ' RC '`nDo you wish to exit now?', This.name, 0x4, 0x10).result {
-            ExitApp()
+        If RC {
+            choice := MsgBoxEx('An error occured while trying to extract the package`nError code: ' RC '`nDo you wish to cancel now?', This.name, 0x5, 0x10).result
+            If 'Cancel' = choice
+                ExitApp()
+            If 'Retry' {
+                FileDelete(package)
+                Reload()
+            }
         }
         infoGui.Destroy()
         infoGui := 0
@@ -486,6 +495,16 @@ Class Base {
         response := whr.ResponseText
         whr := ''
         Return response
+    }
+
+    fileSizeLink(link) {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("HEAD", link, True)
+        whr.Send()
+        whr.WaitForResponse()
+        size := whr.GetResponseHeader("Content-Length")
+        whr := ''
+        Return size
     }
 }
 
@@ -1277,7 +1296,7 @@ Class DataMod extends Base {
 Class Language extends Base {
     name => 'Game Interface Language'
     lngLocation => This.workDirectory '\tools\lng'
-    packageName => 'language.7z'
+    packageName => 'Language.7z'
     packagePath => This.packageLocation '\' This.packageName
     packageLocation => This.workDirectory '\packages'
     packageLink => 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/Language.7z'

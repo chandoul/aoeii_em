@@ -10,7 +10,7 @@ gameLocationHistory := gameapp.gameLocationHistory
 gameRangerExecutable := gameapp.gameRangerExecutable
 gameRangerSetting := gameapp.gameRangerSetting
 gameRegLocation := gameapp.gameRegLocation
-gameLink := 'https://github.com/Chandoul/aoeii_em/raw/refs/heads/master/packages/Age%20of%20Empires%20II.7z'
+gameLink := 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/Age%20of%20Empires%20II.7z'
 
 gameGui := GuiEx(, gameapp.name)
 gameGui.initiate()
@@ -206,10 +206,7 @@ deleteGame(Ctrl, Info) {
 
 downloadGame(ctrl, Info) {
     If (selectedDestination := FileSelect('D', , 'Game install location')) &&
-        downloadAgree := 'Yes' == MsgboxEx(
-            'Are you sure want to install at this location?`n' selectedDestination,
-            'Game install location', 0x4, 0x40
-        ).result
+        downloadAgree := 'Yes' = MsgboxEx('Are you sure want to install at this location?`n' selectedDestination, 'Game install location', 0x4, 0x40).result
         if downloadAgree {
             selectedDestination := RegExReplace(selectedDestination, "\$")
             selectedDestination := selectedDestination '\Age of Empires II'
@@ -223,7 +220,7 @@ downloadGame(ctrl, Info) {
 
             ctrl.Enabled := False
 
-            If !gameapp.downloadPackage(gameLink, gameapp.gamePackage, 269, progressText, progressBar)
+            If !gameapp.downloadPackage(gameLink, gameapp.gamePackage, 269, progressText, progressBar, 1)
                 || !gameapp.extractPackage(gameapp.gamePackage, selectedDestination, , progressText) {
                     ctrl.Enabled := True
                     Return
