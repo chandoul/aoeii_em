@@ -197,11 +197,7 @@ selectDirectory(Ctrl, Info) {
 }
 
 deleteGame(Ctrl, Info) {
-    Ctrl.Enabled := False
-    If FileExist('UninstallGame.ahk') {
-        Run('UninstallGame.ahk "' gameDirectory.Value '"')
-    }
-    Ctrl.Enabled := True
+    Run(gameapp.tools['00_ungame']['run'] ' "' gameDirectory.Value '"')
 }
 
 downloadGame(ctrl, Info) {

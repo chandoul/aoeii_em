@@ -44,7 +44,7 @@ gamesApply := vmGui.addCheckBoxEx('xp-245 y+20', 'Apply the modification to the 
 dataModName := vmGui.AddDropDownList('xp yp+25 w470')
 gamesApply.Checked := vmapp.readConfiguration('vmDataMod')
 
-vmGui.showEx(, 1)
+vmGui.showEx(, 1, vmapp)
 
 vmapp.isGameFolderSelected(vmGui)
 

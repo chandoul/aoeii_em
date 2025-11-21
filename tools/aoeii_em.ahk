@@ -42,16 +42,19 @@ perform := aoeiiGui.addButtonEx('xm w200 y+10', 'Game Status Check', , performGa
 aoeiiGui.SetFont('Bold s10')
 
 aoeiiGui.MarginY := 30
-For each, tool in aoeiiapp.tools {
-    if A_Index = 2
+index := 0
+For key, tool in aoeiiapp.tools {
+    if key = '00_ungame'
+        Continue
+    if ++index = 2
         aoeiiGui.MarginY := 10
-    h := aoeiiGui.addButtonEx('x' (!Mod(A_Index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
-    features[h] := { file: tool['file'], workdir: tool['workdir'] }
+    h := aoeiiGui.addButtonEx('x' (!Mod(index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
+    features[h] := { run: tool['run'], workdir: tool['workdir'] }
 }
 aoeiiGui.MarginY := 20
 
 launchSubApp(h, *) {
-    Run(features[h].file, features[h].workdir)
+    Run(features[h].run, features[h].workdir)
 }
 
 aoeiiGui.ShowEx(, 1)
@@ -256,7 +259,7 @@ performGameAnalyze(*) {
 
         ; fix
         If issueList['05fix'] {
-            RunWait(aoeiiapp.tools['02_fix']['file'] ' "Fix v5"')
+            RunWait(aoeiiapp.tools['02_fix']['run'] ' "Fix v5"')
             aoeiiapp.applyDDrawFix()
             issueList['05fix'].ValueEx := 'success.png'
         }

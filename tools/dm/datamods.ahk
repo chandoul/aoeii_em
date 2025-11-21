@@ -46,7 +46,7 @@ progressText := dmGui.AddText('xp-326 yp+70 Center w469 Hidden BackgroundTrans')
 
 progressBar := dmGui.AddProgress('-Smooth wp Hidden')
 
-dmGui.showEx(, 1)
+dmGui.showEx(, 1, dmapp)
 
 modsList.Choose(1)
 showInfo(modsList, '')
@@ -98,7 +98,7 @@ updateDM(Ctrl, Info) {
 
                 ; Change aoc version to 1.5
                 If verapp.getGameVersions()['aoc'] != '1.5'
-                    RunWait(dmapp.tools['01_version']['file'] ' 1.5')
+                    RunWait(dmapp.tools['01_version']['run'] ' 1.5')
 
                 ; Update the linker in the game executable
                 FileCopy(gameLocation '\age2_x1\age2_x1.exe', dmapp.dmLocation '\', 1)

@@ -79,7 +79,7 @@ verapp.isCommandLineCall({
 }
 )
 
-versionGui.showEx(, 1)
+versionGui.showEx(, 1, verapp)
 analyzeVersion()
 
 findGame(ctrl) {
@@ -127,7 +127,7 @@ applyVersion(ctrl, info) {
         cleansUp(FGame)
         applyReqVersion(ctrl, FGame)
         If autoFix.cbValue && fixChoice.Text != ''
-            Try RunWait('"' fixapp.fixTool '" "' fixChoice.Text '"')
+            Try RunWait(fixapp.tools['02_fix']['run'] ' "' fixChoice.Text '"')
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
@@ -139,7 +139,7 @@ applyVersion(ctrl, info) {
         cleansUp(FGame)
         applyReqVersion(ctrl, FGame)
         If autoFix.cbValue && fixChoice.Text != ''
-            Try RunWait('"' fixapp.tools['02_fix']['file'] '" "' fixChoice.Text '"')
+            Try RunWait(fixapp.tools['02_fix']['run'] ' "' fixChoice.Text '"')
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
@@ -158,7 +158,7 @@ appliedVersionLookUp(
     matchVersion := ''
     Loop Files, verapp.versionLocation '\' location '\*', 'D' {
         version := A_LoopFileName
-        If fixapp.folderMatch(A_LoopFileFullPath, gameLocation, ignoreFiles) {
+        If verapp.folderMatch(A_LoopFileFullPath, gameLocation, ignoreFiles) {
             For control in availableVersions[location] {
                 If control.Text = version {
                     Return [matchVersion, control]

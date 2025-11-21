@@ -7,6 +7,7 @@
 #define SHORTCUT_ICON "resources\aoeii_em-icon-2.ico"
 #define SETUP_IMG "resources\aoeii_em-side.png"
 #define SETUP_AHK "resources\AutoHotkey_2.0.19_setup.exe"
+#define INTERPRETER_AHK "resources\AutoHotkey32_2.0.19.exe"
 #define SETUP_NAME "aoeii_em"
 [Setup]
 AppId=6C8A2B8E-EE1C-4FA8-8BB9-149BA20347BA
@@ -32,7 +33,7 @@ UninstallDisplayIcon={app}\resources\aoeii_em-icon-2.ico
 Name: "{app}\packages"
 
 [Files]
-Source: {#SETUP_AHK}; DestDir: "{app}\resources"; Flags: ignoreversion dontcopy
+Source: {#INTERPRETER_AHK}; DestDir: "{app}\resources"; Flags: ignoreversion
 Source: {#SHORTCUT_ICON}; DestDir: "{app}\resources"; Flags: ignoreversion
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs
 Source: "..\externals\*"; DestDir: "{app}\externals"; Flags: ignoreversion recursesubdirs
@@ -63,13 +64,20 @@ Source: "..\workDirectory"; DestDir: "{app}"; Flags: ignoreversion
 // other files
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
 [Icons]
-Name: "{commondesktop}\Age of Empires II Easy Manager"; Filename: "{app}\tools\aoeii_em.ahk"; WorkingDir: "{app}\tools"; IconFilename: "{app}\resources\aoeii_em-icon-2.ico"
+Name: "{commondesktop}\Age of Empires II Easy Manager"; Filename: "{app}\{#INTERPRETER_AHK}"; \
+Parameters: """{app}\tools\aoeii_em.ahk"""; \
+WorkingDir: "{app}\tools"; \
+IconFilename: "{app}\resources\aoeii_em-icon-2.ico";
+
 Name: "{group}\Age of Empires II Easy Manager"; Filename: "{app}\tools\aoeii_em.ahk"; WorkingDir: "{app}"
 Name: "{group}\Uninstall Age of Empires II Easy Manager"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "{app}\tools\aoeii_em.ahk"; Description: "Run Age of Empires II Easy Manager v{#APP_VERSION}"; Flags: postinstall shellexec
+Filename: "{commondesktop}\Age of Empires II Easy Manager"; \
+Description: "Run Age of Empires II Easy Manager v{#APP_VERSION}"; \
+Flags: postinstall shellexec
 
 [Languages]
 Name: "English"; MessagesFile: "compiler:Default.isl"
@@ -102,27 +110,6 @@ Name: "Tamil"; MessagesFile: "compiler:Languages\Tamil.isl"
 Name: "Ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [code]
-// Registery view 32/64
-function GetHKLM: Integer;
-begin
-  if IsWin64 then Result := HKLM64
-  else Result := HKCU32;
-end;
-function GetHKCU: Integer;
-begin
-  if IsWin64 then Result := HKCU64
-  else Result := HKCU32;
-end;
-
-// AHK registery key
-function AHKInstalled: boolean;
-begin
-  Result := True;
-  if not (RegKeyExists(GetHKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey') 
-       or RegKeyExists(GetHKCU, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey')) then
-    Result := False
-end;
-
 // Some color update
 procedure InitializeWizard();
 begin
@@ -130,42 +117,20 @@ begin
   WizardForm.Color := $97DAF4;
 end;
 
-function PrepareToInstall(var NeedsRestart: Boolean): String;
-var ErrorCode:Integer;
-begin
-  Result := '';
-  if not AHKInstalled then
-    begin
-        ExtractTemporaryFile('AutoHotkey_2.0.19_setup.exe');
-        if ShellExec('', ExpandConstant('{tmp}\AutoHotkey_2.0.19_setup.exe'), '', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode) then 
-            if ErrorCode <> 0 then Result := '{#AHK_FAILED}'
-        else Result := '{#AHK_FAILED}';
-        if not AHKInstalled then Result := '{#AHK_FAILED}';
-    end;
-    if not AHKInstalled then Result := '{#AHK_FAILED}';
-end;
-procedure CurStepChanged(CurStep: TSetupStep);
-var
-SourcePath, DestPath: String;
-begin
-    if CurStep = ssDone then
-    begin
-        SourcePath := ExpandConstant('Output\{#SETUP_NAME}_v{#APP_VERSION}'); // Replace with your actual source file
-        DestPath := ExpandConstant('Output\{#SETUP_NAME}_latest'); // Replace with your actual destination
-        if FileExists(SourcePath) then
-        begin
-            if FileCopy(SourcePath, DestPath, False) then // False means overwrite if exists
-            begin
-            Log('Successfully copied ' + SourcePath + ' to ' + DestPath);
-            end
-            else
-            begin
-            Log('Failed to copy ' + SourcePath + ' to ' + DestPath);
-            end;
-        end
-        else
-        begin
-            Log('Source file not found: ' + SourcePath);
-        end;
-    end;
-end;
+[Registry]
+Root: HKCU32; \
+    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
+    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
+    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: not IsWin64
+Root: HKLM32; \
+    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
+    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
+    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: not IsWin64
+Root: HKCU64; \
+    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
+    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
+    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: IsWin64
+Root: HKLM64; \
+    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
+    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
+    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: IsWin64

@@ -171,7 +171,7 @@ fixapp.isCommandLineCall({
     callback: applyFix
 })
 
-fixGui.showEx(, 1)
+fixGui.showEx(, 1, fixapp)
 analyzeFix()
 
 /**

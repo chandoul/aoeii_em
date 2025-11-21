@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '4.0'
+    version => '4.1'
     author => 'Smile'
     license => 'MIT'
     workDirectory => This.workDir()
@@ -15,48 +15,63 @@ Class Base {
         '00_game', Map(
             'title', 'My Game',
             'file', This.workDirectory '\tools\game\game.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\game\game.ahk'),
+            'workdir', This.workDirectory '\tools\game',
+            'pid', 0
+        ),
+        '00_ungame', Map(
+            'title', 'My Game',
+            'file', This.workDirectory '\tools\game\uninstallgame.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\game\uninstallgame.ahk'),
             'workdir', This.workDirectory '\tools\game',
             'pid', 0
         ),
         '01_version', Map(
             'title', 'Versions',
             'file', This.workDirectory '\tools\version\version.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\version\version.ahk'),
             'workdir', This.workDirectory '\tools\version',
             'pid', 0
         ),
         '02_fix', Map(
             'title', 'Patchs and Fixs',
             'file', This.workDirectory '\tools\fix\fix.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\fix\fix.ahk'),
             'workdir', This.workDirectory '\tools\fix',
             'pid', 0
         ),
         '03_lng', Map(
             'title', 'Interface Language',
             'file', This.workDirectory '\tools\lng\language.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\lng\language.ahk'),
             'workdir', This.workDirectory '\tools\lng\',
             'pid', 0
         ),
         '04_vm', Map(
             'title', 'Visual Mods',
             'file', This.workDirectory '\tools\vm\visualmods.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\vm\visualmods.ahk'),
             'workdir', This.workDirectory '\tools\vm\',
             'pid', 0
         ),
         '05_dm', Map(
             'title', 'Data Mods',
             'file', This.workDirectory '\tools\dm\datamods.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\dm\datamods.ahk'),
             'workdir', This.workDirectory '\tools\dm\',
             'pid', 0
         ),
         '06_rec', Map(
             'title', 'Recordings',
             'file', This.workDirectory '\tools\rec\recanalyst.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\rec\recanalyst.ahk'),
             'workdir', This.workDirectory '\tools\rec\',
             'pid', 0
         ),
         '07_ahk', Map(
             'title', 'AHK Hotkeys',
             'file', This.workDirectory '\tools\ahk\ahk.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\ahk\ahk.ahk'),
             'workdir', This.workDirectory '\tools\ahk\',
             'pid', 0
         ),
@@ -284,11 +299,10 @@ Class Base {
             }
             infoGui := GuiEx('-SysMenu', This.name)
             infoGui.initiate(0, , 0, 0)
-            infoGui.addGif('xm+90', 'bored.gif')
-            infoGui.AddText(
-                'BackgroundTrans xm w400 Center cRed', info.text)
+            infoGui.addGif('xm+90', 'bored.gif').Focus()
+            infoGui.AddEdit('-E0x200 xm w400 Center cRed BackgroundE1B15A', info.text)
             infoGui.SetFont('s9')
-            cap := infoGui.AddText('BackgroundTrans xm w400 Center', info.subtext)
+            cap := infoGui.AddEdit('-E0x200 y+0 w400 Center BackgroundE1B15A ', info.subtext)
             infoGui.OnEvent('Close', terminate)
             terminate(*) {
                 If ProcessExist(PID) {
@@ -590,7 +604,15 @@ Class GuiEx extends Gui {
         Hotkey("End", (*) => vmGuiSB.ScrollMsg(7, 0, GetKeyState("Shift") ? 0x114 : 0x115, This.Hwnd))
         HotIfWinActive
     }
-    showEx(options := '', backImage := 0) {
+    showEx(options := '', backImage := 0, app := 0) {
+        If app && app.HasMethod('ensurePackage') {
+            This.SetFont('s8')
+            updatePackage := This.addButtonEx('xm w200', 'Update Package', , update)
+            update(*) {
+                app.ensurePackage(1)
+                Reload()
+            }
+        }
         If This.footer
             This.addAOEFooter()
         This.Show(options)
@@ -1010,9 +1032,9 @@ Class Version extends Base {
      */
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
-            This.downloadPackage(This.packageLink, This.packagePath)
+            This.downloadPackage(This.packageLink, This.packagePath, , , , update)
             This.extractPackage(This.packagePath, This.versionLocation)
-        } Else This.extractPackage(This.packagePath, This.versionLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
+        } ;Else This.extractPackage(This.packagePath, This.versionLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
     }
 
     /**
@@ -1174,9 +1196,9 @@ Class FixPatch extends Base {
      */
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
-            This.downloadPackage(This.packageLink, This.packagePath)
+            This.downloadPackage(This.packageLink, This.packagePath, , , , update)
             This.extractPackage(This.packagePath, This.fixLocation)
-        } Else This.extractPackage(This.packagePath, This.fixLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
+        } ;Else This.extractPackage(This.packagePath, This.fixLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
     }
 
     /**
@@ -1230,9 +1252,9 @@ Class VisualMod extends Base {
      */
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
-            This.downloadPackage(This.packageLink, This.packagePath)
+            This.downloadPackage(This.packageLink, This.packagePath, , , , update)
             This.extractPackage(This.packagePath, This.vmLocation)
-        } Else This.extractPackage(This.packagePath, This.vmLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
+        } ;Else This.extractPackage(This.packagePath, This.vmLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
     }
 }
 
@@ -1304,9 +1326,9 @@ Class Language extends Base {
      */
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
-            This.downloadPackage(This.packageLink, This.packagePath)
+            This.downloadPackage(This.packageLink, This.packagePath, , , , update)
             This.extractPackage(This.packagePath, This.lngLocation)
-        } Else This.extractPackage(This.packagePath, This.lngLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
+        } ;Else This.extractPackage(This.packagePath, This.lngLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
     }
 
     /**
@@ -1344,9 +1366,9 @@ Class Recanalyst extends Base {
     packageLink => 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/Rec.7z'
     ensurePackage(update := 0) {
         If !FileExist(This.packagePath) || update {
-            This.downloadPackage(This.packageLink, This.packagePath)
+            This.downloadPackage(This.packageLink, This.packagePath, , , , update)
             This.extractPackage(This.packagePath, This.recLocation)
-        } Else This.extractPackage(This.packagePath, This.recLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
+        } ;Else This.extractPackage(This.packagePath, This.recLocation, , , 'aos', { text: 'Verifying the files', subtext: 'Making sure all necessary files are correctly exist before startup!' })
     }
     /**
      * Start the php server and return it PID
@@ -1380,6 +1402,14 @@ Class HoldOn {
             This.infoGui.Destroy()
         }
     }
+}
+
+cmdJoin(args*) {
+    argsJoined := ''
+    For arg in args {
+        argsJoined .= '"' arg '" '
+    }
+    return argsJoined
 }
 
 ; external libs

@@ -27,7 +27,7 @@ lngapp.isCommandLineCall({
     callback: applyLanguage
 })
 
-lngGui.showEx('h600', 1)
+lngGui.showEx('h600', 1, lngapp)
 analyzeLanguage()
 
 /**
