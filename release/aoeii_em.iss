@@ -9,6 +9,7 @@
 #define SETUP_AHK "resources\AutoHotkey_2.0.19_setup.exe"
 #define INTERPRETER_AHK "resources\AutoHotkey32_2.0.19.exe"
 #define SETUP_NAME "aoeii_em"
+
 [Setup]
 AppId=6C8A2B8E-EE1C-4FA8-8BB9-149BA20347BA
 AppName={#APP_NAME}
@@ -26,7 +27,6 @@ DisableWelcomePage=no
 OutputDir=..\release
 WizardImageFile={#SETUP_IMG}
 OutputBaseFilename={#SETUP_NAME}_setup_latest
-WindowVisible=yes
 UninstallDisplayIcon={app}\resources\aoeii_em-icon-2.ico
 
 [Dirs]
