@@ -1,5 +1,4 @@
 #define APP_NAME "Age of Empires II Easy Manager"
-#define APP_VERSION "4.0"
 #define INSTALL_DIR "{commonpf}\Age of Empires II Easy Manager v2"
 #define AHK "AutoHotkey"
 #define AHK_FAILED "AutoHotkey is missing, it has to be installed first!."

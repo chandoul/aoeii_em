@@ -1,7 +1,11 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-RunWait('iscc aoeii_em_setup.iss')
+#Include ..\libs\Base.ahk
+
+appver := Base().version
+
+RunWait('iscc aoeii_em_setup.iss /DAPP_VERSION=' appver)
 Size := FileGetSize('aoeii_em_setup_latest.exe')
 Size /= 1024
 Size /= 1024
