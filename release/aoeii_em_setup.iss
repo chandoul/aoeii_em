@@ -58,6 +58,8 @@ Source: "..\tools\rec\recanalyst.ahk"; DestDir: "{app}\tools\rec"; Flags: ignore
 Source: "..\tools\version\version.ahk"; DestDir: "{app}\tools\version"; Flags: ignoreversion
 // visual mods
 Source: "..\tools\vm\visualmods.ahk"; DestDir: "{app}\tools\vm"; Flags: ignoreversion
+// hide all ip
+Source: "..\tools\hai\hideallip.ahk"; DestDir: "{app}\tools\hai"; Flags: ignoreversion
 // main
 Source: "..\tools\aoeii_em.ahk"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "..\workDirectory"; DestDir: "{app}"; Flags: ignoreversion

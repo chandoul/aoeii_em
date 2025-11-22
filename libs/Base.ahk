@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '4.1'
+    version => '4.2'
     author => 'Smile'
     license => 'MIT'
     workDirectory => This.workDir()
@@ -73,6 +73,13 @@ Class Base {
             'file', This.workDirectory '\tools\ahk\ahk.ahk',
             'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\ahk\ahk.ahk'),
             'workdir', This.workDirectory '\tools\ahk\',
+            'pid', 0
+        ),
+        '08_hai', Map(
+            'title', 'Hide ALL IP Reset',
+            'file', This.workDirectory '\tools\hai\hideallip.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\hai\hideallip.ahk'),
+            'workdir', This.workDirectory '\tools\hai\',
             'pid', 0
         ),
     )
@@ -384,8 +391,8 @@ Class Base {
                 FileDelete(location '\windmode.dll')
             }
         }
-        This.compatibilityClear([This.userRegLayer, This.machineRegLayer], This.gameLocation '\empires2.exe')
-        This.compatibilityClear([This.userRegLayer, This.machineRegLayer], This.gameLocation '\age2_x1\age2_x1.exe')
+        This.compatibilityClear(, This.gameLocation '\empires2.exe')
+        This.compatibilityClear(, This.gameLocation '\age2_x1\age2_x1.exe')
     }
 
     /**
@@ -412,8 +419,8 @@ Class Base {
                 FileDelete(location '\age2_x1\ddraw.dll')
             }
         }
-        This.compatibilitySet([This.userRegLayer, This.machineRegLayer], This.gameLocation '\empires2.exe', 'RUNASADMIN WINXPSP3')
-        This.compatibilitySet([This.userRegLayer, This.machineRegLayer], This.gameLocation '\age2_x1\age2_x1.exe', 'RUNASADMIN WINXPSP3')
+        This.compatibilitySet(, This.gameLocation '\empires2.exe', 'RUNASADMIN WINXPSP3')
+        This.compatibilitySet(, This.gameLocation '\age2_x1\age2_x1.exe', 'RUNASADMIN WINXPSP3')
     }
 
     /**
@@ -430,7 +437,7 @@ Class Base {
      * Clears out a compatibility to an executable
      * @param ValueName 
      */
-    compatibilityClear(layers := [], valueName := '') {
+    compatibilityClear(layers := [This.userRegLayer, This.machineRegLayer], valueName := '') {
         If !valueName {
             Return
         }
@@ -445,7 +452,7 @@ Class Base {
      * @param ValueName 
      * @param Value 
      */
-    compatibilitySet(layers := [], valueName := '', value := '') {
+    compatibilitySet(layers := [This.userRegLayer, This.machineRegLayer], valueName := '', value := '') {
         If !valueName {
             Return
         }
