@@ -306,7 +306,7 @@ Class Base {
             }
             infoGui := GuiEx('-SysMenu', This.name)
             infoGui.initiate(0, , 0, 0)
-            infoGui.addGif('xm+90', 'bored.gif').Focus()
+            Try infoGui.addGif('xm+90', 'bored.gif').Focus()
             infoGui.AddEdit('-E0x200 xm w400 Center cRed BackgroundE1B15A', info.text)
             infoGui.SetFont('s9')
             cap := infoGui.AddEdit('-E0x200 y+0 w400 Center BackgroundE1B15A ', info.subtext)
@@ -1398,7 +1398,7 @@ Class HoldOn {
         This.stop()
         This.infoGui := GuiEx('-SysMenu', This.name)
         This.infoGui.initiate(0, , 0, 0)
-        This.infoGui.addGif('xm+90', 'bored.gif')
+        Try This.infoGui.addGif('xm+90', 'bored.gif')
         This.infoGui.AddText('BackgroundTrans xm w400 Center cRed', 'Please Wait...')
         This.infoGui.SetFont('s9')
         This.infoGui.AddText('BackgroundTrans xm w400 Center', text)
