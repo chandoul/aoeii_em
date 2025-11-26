@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '4.3'
+    version => '4.4'
     author => 'Smile'
     license => 'MIT'
     workDirectory => This.workDir()
@@ -102,7 +102,7 @@ Class Base {
     revealfix => This.workDirectory '\externals\revealfix.exe'
     lngLoader => This.workDirectory '\externals\language_x1_p1.dll'
     mmodsDLL => This.workDirectory '\externals\mmods'
-    guiIcon => This.workDirectory '\assets\aoeii_em-icon-3.ico'
+    guiIcon => This.workDirectory '\assets\aoeii_em-icon-2.ico'
     /**
      * Make sure the app base is correctly found
      */
@@ -306,17 +306,18 @@ Class Base {
             }
             infoGui := GuiEx('-SysMenu', This.name)
             infoGui.initiate(0, , 0, 0)
-            Try infoGui.addGif('xm+90', 'bored.gif').Focus()
-            infoGui.AddEdit('-E0x200 xm w400 Center cRed BackgroundE1B15A', info.text)
+            infoGui.BackColor := '0xE1B15A'
+            infoGui.addGif('xm+90', 'bored.gif').Focus()
+            infoGui.AddEdit('-E0x200 xm w400 Center cRed Backgroundc0923b', info.text)
             infoGui.SetFont('s9')
-            cap := infoGui.AddEdit('-E0x200 y+0 w400 Center BackgroundE1B15A ', info.subtext)
+            cap := infoGui.AddEdit('-E0x200 y+0 w400 Center Backgroundc0923b ', info.subtext)
             infoGui.OnEvent('Close', terminate)
             terminate(*) {
                 If ProcessExist(PID) {
                     ProcessClose(PID)
                 }
             }
-            infoGui.showEx(, 1)
+            infoGui.showEx()
         }
         RC := RunWait('"' This._7zrCsle '" x "' package '" -o"' destination '" -' overwrite, , hide ? 'Hide' : '', &PID)
         If RC {
@@ -810,9 +811,14 @@ Class GuiEx extends Gui {
         If !FileExist(gif) {
             gif := ''
         }
-        pic := This.addPictureEx(options, gif)
-        gif := ImageShow(gif, , [0, 0], 0x40000000 | 0x10000000 | 0x8000000, , pic.Hwnd)
-        Return pic
+        ;pic := This.addPictureEx(options, gif)
+        ;gif := ImageShow(gif, , [0, 0], 0x40000000 | 0x10000000 | 0x8000000, , pic.Hwnd)
+        pGif := Gdip_CreateBitmapFromFile(gif)
+        Gdip_GetDimensions(pGif, &width, &height)
+        Gdip_DisposeImage(pGif)
+        html := Format('<img src="{}" style="position:absolute;left: 0;top: 0;">', gif)
+        AX := This.AddActiveX(options ' w' width ' h' height, 'mshtml:' html)
+        Return AX
     }
 
     /**
@@ -1398,7 +1404,7 @@ Class HoldOn {
         This.stop()
         This.infoGui := GuiEx('-SysMenu', This.name)
         This.infoGui.initiate(0, , 0, 0)
-        Try This.infoGui.addGif('xm+90', 'bored.gif')
+        This.infoGui.addGif('xm+90', 'bored.gif')
         This.infoGui.AddText('BackgroundTrans xm w400 Center cRed', 'Please Wait...')
         This.infoGui.SetFont('s9')
         This.infoGui.AddText('BackgroundTrans xm w400 Center', text)
@@ -1424,5 +1430,4 @@ cmdJoin(args*) {
 #Include ImageButton.ahk
 #Include Gdip.ahk
 #Include ScrollBars.ahk
-#Include ImagePut.ahk
 #Include LockCheck.ahk
