@@ -193,26 +193,26 @@ Class Base {
      * @param key 
      * @returns {string} 
      */
-    readConfiguration(key) {
-        Return IniRead(This.configuration, This.namespace, key, '')
-    }
+    readConfiguration(key) => IniRead(This.configuration, This.namespace, key, '')
 
     /**
      * Write user configuration
      * @param key 
      * @param value 
      */
-    writeConfiguration(key, value) {
-        IniWrite(value, This.configuration, This.namespace, key)
-    }
+    writeConfiguration(key, value) => IniWrite(value, This.configuration, This.namespace, key)
+
+    /**
+     * Check if the config file exists
+     * @returns {bool} 
+     */
+    configurationExists() => FileExist(This.configuration)
 
     /**
      * Check if there is internet connection
      * @returns {bool}
      */
-    getConnectedState() {
-        Return DllCall("Wininet.dll\InternetGetConnectedState", "Str", Flag := 0x40, "Int", 0)
-    }
+    getConnectedState() => DllCall("Wininet.dll\InternetGetConnectedState", "Str", Flag := 0x40, "Int", 0)
 
     /**
      * Download a file with some progress info

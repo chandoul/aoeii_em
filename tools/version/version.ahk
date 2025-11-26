@@ -64,11 +64,13 @@ autoFix := versionGui.addCheckBoxEx(, 'Auto enable a fix:', patchEnable)
 fixChoice := versionGui.AddDropDownList('w200 Disabled Choose6', fixs)
 autoFix.Checked := verapp.readConfiguration('autoFix')
 
+if !verapp.configurationExists() {
+    verapp.writeConfiguration('ddrAuto', 1)
+}
 ddrAuto := versionGui.addCheckBoxEx(, 'Auto enable direct draw fix', ddrEnable)
 ddrAuto.Checked := verapp.readConfiguration('ddrAuto')
 
 versionGui.MarginY := 20
-
 
 verapp.isGameFolderSelected(versionGui)
 
