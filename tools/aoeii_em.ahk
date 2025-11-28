@@ -49,13 +49,11 @@ For key, tool in aoeiiapp.tools {
     if ++index = 2
         aoeiiGui.MarginY := 10
     h := aoeiiGui.addButtonEx('x' (!Mod(index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
-    features[h] := { run: tool['run'], workdir: tool['workdir'] }
+    features[h] := { run: tool['file'], workdir: tool['workdir'] }
 }
 aoeiiGui.MarginY := 20
 
-launchSubApp(h, *) {
-    Run(features[h].run, features[h].workdir)
-}
+launchSubApp(h, *) => Run(features[h].run, features[h].workdir)
 
 aoeiiGui.ShowEx(, 1)
 

@@ -197,7 +197,7 @@ selectDirectory(Ctrl, Info) {
 }
 
 deleteGame(Ctrl, Info) {
-    Run(gameapp.tools['00_ungame']['run'] ' "' gameDirectory.Value '"')
+    Run(gameapp.tools['00_ungame']['file'] ' "' gameDirectory.Value '"')
 }
 
 downloadGame(ctrl, Info) {

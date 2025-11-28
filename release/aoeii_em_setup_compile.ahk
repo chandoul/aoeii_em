@@ -5,9 +5,12 @@
 
 appver := Base().version
 
-RunWait('iscc aoeii_em_setup.iss /DAPP_VERSION=' appver)
-Size := FileGetSize('aoeii_em_setup_latest.exe')
-Size /= 1024
-Size /= 1024
-Size := Round(Size, 2)
-FileOpen('aoeii_em_setup_size.txt', 'w').Write(Size)
+If !RunWait('iscc aoeii_em_setup.iss /DAPP_VERSION=' appver) {
+    Size := FileGetSize('aoeii_em_setup_latest.exe')
+    Size /= 1024
+    Size /= 1024
+    Size := Round(Size, 2)
+    FileOpen('aoeii_em_setup_size.txt', 'w').Write(Size)
+    ; Run setup
+    Run('aoeii_em_setup_latest.exe')
+}

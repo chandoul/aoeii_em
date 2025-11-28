@@ -18,8 +18,9 @@ resetTrial(*) {
             MsgBoxEx("Hide All IP not found!`nYou must install Hide All IP first.", 'Hide All IP Trial Reset', , 0x30)
             Return
         }
-        If ProcessExist('HideALLIP.exe')
-            ProcessClose('HideALLIP.exe')
+
+        ProcessCloseEx('HideALLIP.exe')
+
         ; Clear registery
         Loop Parse, "HKCU|HKLM", '|' {
             hk := A_LoopField
@@ -36,7 +37,7 @@ resetTrial(*) {
             MsgBoxEx("Activation attempt failed!`nThe Hint Time Form wasn't found.", 'Hide All IP Trial Reset', , 0x30)
             Return
         }
-        ProcessClose('HideALLIP.exe')
+        ProcessCloseEx('HideALLIP.exe')
 
         haiapp.compatibilitySet(, haiPath, setting)
 
@@ -46,7 +47,7 @@ resetTrial(*) {
             Return
         }
 
-        ProcessClose('HideALLIP.exe')
+        ProcessCloseEx('HideALLIP.exe')
 
         haiapp.compatibilityClear(, haiPath)
 
@@ -55,5 +56,11 @@ resetTrial(*) {
         if A_Index = 1 && "Yes" != MsgBoxEx('Still not working?, give this another try?', 'Hide All IP Trial Reset', 0x4, 0x20).result {
             Break
         }
+    }
+}
+
+ProcessCloseEx(PN) {
+    If ProcessExist(PN) {
+        ProcessWaitClose(PN, 3)
     }
 }

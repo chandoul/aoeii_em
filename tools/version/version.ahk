@@ -129,7 +129,7 @@ applyVersion(ctrl, info) {
         cleansUp(FGame)
         applyReqVersion(ctrl, FGame)
         If autoFix.cbValue && fixChoice.Text != ''
-            Try RunWait(fixapp.tools['02_fix']['run'] ' "' fixChoice.Text '"')
+            Try RunWait(fixapp.tools['02_fix']['file'] ' "' fixChoice.Text '"')
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
@@ -141,7 +141,7 @@ applyVersion(ctrl, info) {
         cleansUp(FGame)
         applyReqVersion(ctrl, FGame)
         If autoFix.cbValue && fixChoice.Text != ''
-            Try RunWait(fixapp.tools['02_fix']['run'] ' "' fixChoice.Text '"')
+            Try RunWait(fixapp.tools['02_fix']['file'] ' "' fixChoice.Text '"')
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }

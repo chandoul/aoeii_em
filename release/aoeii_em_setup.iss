@@ -5,9 +5,11 @@
 #define SETUP_ICON "resources\aoeii_em-icon-2.png"
 #define SHORTCUT_ICON "resources\aoeii_em-icon-2.ico"
 #define SETUP_IMG "resources\aoeii_em-side.png"
-#define SETUP_AHK "resources\AutoHotkey_2.0.19_setup.exe"
+#define SETUP_AHK_NAME "AutoHotkey_2.0.19_setup.exe"
+#define SETUP_AHK "resources\" + SETUP_AHK_NAME
 #define INTERPRETER_AHK "resources\AutoHotkey32_2.0.19.exe"
 #define SETUP_NAME "aoeii_em"
+//#define APP_VERSION "1.0"
 
 [Setup]
 AppId=6C8A2B8E-EE1C-4FA8-8BB9-149BA20347BA
@@ -32,7 +34,7 @@ UninstallDisplayIcon={app}\resources\aoeii_em-icon-2.ico
 Name: "{app}\packages"
 
 [Files]
-Source: {#INTERPRETER_AHK}; DestDir: "{app}\resources"; Flags: ignoreversion
+Source: {#SETUP_AHK}; DestDir: "{app}\resources"; Flags: ignoreversion dontcopy
 Source: {#SHORTCUT_ICON}; DestDir: "{app}\resources"; Flags: ignoreversion
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs
 Source: "..\externals\*"; DestDir: "{app}\externals"; Flags: ignoreversion recursesubdirs
@@ -67,8 +69,7 @@ Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{commondesktop}\Age of Empires II Easy Manager"; Filename: "{app}\{#INTERPRETER_AHK}"; \
-Parameters: """{app}\tools\aoeii_em.ahk"""; \
+Name: "{commondesktop}\Age of Empires II Easy Manager"; Filename: "{app}\tools\aoeii_em.ahk"; \
 WorkingDir: "{app}\tools"; \
 IconFilename: "{app}\resources\aoeii_em-icon-2.ico";
 
@@ -118,20 +119,42 @@ begin
   WizardForm.Color := $97DAF4;
 end;
 
-[Registry]
-Root: HKCU32; \
-    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
-    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
-    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: not IsWin64
-Root: HKLM32; \
-    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
-    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
-    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: not IsWin64
-Root: HKCU64; \
-    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
-    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
-    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: IsWin64
-Root: HKLM64; \
-    Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
-    ValueType: String; ValueName: "{app}\{#INTERPRETER_AHK}"; ValueData: "RUNASADMIN"; \
-    Flags: uninsdeletekeyifempty uninsdeletevalue; Check: IsWin64
+function IsAppInstalled(): Boolean;
+var InstallPath: string;
+    NodeHKLM, NodeHKCU: integer;
+begin
+    NodeHKLM := HKLM;
+    NodeHKCU := HKCU;
+    if IsWin64 then 
+    begin
+        NodeHKLM := HKLM64;
+        NodeHKCU := HKCU64;
+    end; 
+    Result := RegQueryStringValue(NodeHKLM,'Software\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey', 'InstallLocation', InstallPath) 
+           or RegQueryStringValue(NodeHKLM, 'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey', 'InstallLocation', InstallPath)
+           or RegQueryStringValue(NodeHKCU,'Software\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey', 'InstallLocation', InstallPath) 
+           or RegQueryStringValue(NodeHKCU, 'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\AutoHotkey', 'InstallLocation', InstallPath);
+end;
+
+function InitializeSetup(): Boolean;
+var ResultCode: integer;
+begin
+    if not IsAppInstalled() then
+    begin
+        if IDNO = MsgBox('AutoHotkey is required to run this application!, Do you like to install it now?', mbError, MB_YESNO) 
+            then Result := False
+        else
+        begin
+            ExtractTemporaryFile(ExpandConstant('{#SETUP_AHK_NAME}'));
+            ExecAsOriginalUser(ExpandConstant('{tmp}\{#SETUP_AHK_NAME}'), '', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
+            if not IsAppInstalled()
+            then begin
+                if IDYES = MsgBox('Unabled to find AutoHotkey on your system!, do you wish to continue anyway?', mbError, MB_YESNO)
+                then Result := True
+                else Result := False;
+            end
+            else Result := True;
+        end;
+    end 
+    else Result := True;
+end;
