@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '4.6'
+    version => '4.7'
     author => 'Smile'
     license => 'MIT'
     workDirectory => This.workDir()
@@ -1308,7 +1308,7 @@ Class DataMod extends Base {
             'packagePath', This.packageLocation '\ElementalTD-2.08.7z',
             'packageVersion', '2.08',
             'packageSizeMB', '65.5',
-            'packageLink', 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/ElementalTD-2.03.7z',
+            'packageLink', 'https://github.com/chandoul/aoeii_em/raw/refs/heads/master/packages/ElementalTD-2.08.7z',
             'description', "by BinaryPotka`nNew 2023 TD mod with Elemental Towers.",
             'thumbnail', This.workDirectory '\assets\Elemental TD.png'
         ),
