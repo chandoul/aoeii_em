@@ -5,7 +5,6 @@
 
 haiapp := Base()
 
-haiPath := (A_Is64bitOS ? EnvGet('ProgramFiles(x86)') : EnvGet('ProgramFiles')) '\Hide All IP\HideALLIP.exe'
 
 haiGui := GuiEx(, 'Hide All IP Trial Reset')
 haiGui.initiate(, , 0)
@@ -13,12 +12,14 @@ haiGui.addButtonEx('xm w400', 'Reset Trial Period', , resetTrial)
 haiGui.showEx(, 1)
 
 resetTrial(*) {
-    For setting in ['WIN7RTM RUNASADMIN', 'WIN8RTM RUNASADMIN'] {
-        If !FileExist(haiPath) {
-            MsgBoxEx("Hide All IP not found!`nYou must install Hide All IP first.", 'Hide All IP Trial Reset', , 0x30)
+    Static haiPath := (A_Is64bitOS ? EnvGet('ProgramFiles(x86)') : EnvGet('ProgramFiles')) '\Hide All IP\HideALLIP.exe'
+    If !FileExist(haiPath) {
+        If !haiPath := FileSelect(, , 'Select hide all ip application', 'Application (*.exe; *.lnk)') {
+            MsgBoxEx("Hide All IP not found!`nYou must install Hide All IP first", 'Hide All IP Trial Reset', , 0x30)
             Return
         }
-
+    }
+    For setting in ['WIN7RTM RUNASADMIN', 'WIN8RTM RUNASADMIN'] {
         ProcessCloseEx('HideALLIP.exe')
 
         ; Clear registery
