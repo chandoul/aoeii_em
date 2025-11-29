@@ -381,10 +381,25 @@ Class Base {
             This.gameLocation '\age2_x1\'
         ]
     ) {
-        ;This.ensureDDrawPackage()
         For location in locations {
             If DirExist(location)
                 DirCopy(This.ddrawLocation, location, 1)
+        }
+        This.reviewWindowModeCompatibility()
+        This.compatibilityClear(, This.gameLocation '\empires2.exe')
+        This.compatibilityClear(, This.gameLocation '\age2_x1\age2_x1.exe')
+    }
+
+    reviewWindowModeCompatibility(
+        locations := [
+            This.gameLocation '\',
+            This.gameLocation '\age2_x1\'
+        ]
+    ) {
+        For location in locations {
+            If !FileExist(location '\dsound.dll') || !FileExist(location '\ddraw.dll') {
+                Continue
+            }
             If FileExist(location '\wndmode.dll') {
                 FileDelete(location '\wndmode.dll')
             }
@@ -392,8 +407,6 @@ Class Base {
                 FileDelete(location '\windmode.dll')
             }
         }
-        This.compatibilityClear(, This.gameLocation '\empires2.exe')
-        This.compatibilityClear(, This.gameLocation '\age2_x1\age2_x1.exe')
     }
 
     /**
@@ -420,8 +433,8 @@ Class Base {
                 FileDelete(location '\age2_x1\ddraw.dll')
             }
         }
-        This.compatibilitySet(, This.gameLocation '\empires2.exe', 'RUNASADMIN WINXPSP3')
-        This.compatibilitySet(, This.gameLocation '\age2_x1\age2_x1.exe', 'RUNASADMIN WINXPSP3')
+        This.compatibilitySet(, This.gameLocation '\empires2.exe', '~ RUNASADMIN WINXPSP3')
+        This.compatibilitySet(, This.gameLocation '\age2_x1\age2_x1.exe', '~ RUNASADMIN WINXPSP3')
     }
 
     /**

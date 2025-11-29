@@ -133,6 +133,7 @@ applyVersion(ctrl, info) {
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
+        verapp.reviewWindowModeCompatibility()
     } Catch {
         If !lockCheck(gameLocation) {
             verapp.enableOptions(availableVersions[FGame])
@@ -145,6 +146,7 @@ applyVersion(ctrl, info) {
         If ddrAuto.cbValue {
             verapp.applyDDrawFix()
         }
+        verapp.reviewWindowModeCompatibility()
     }
     analyzeVersion()
     SoundPlay(verapp.workDirectory '\assets\mp3\30 Wololo.mp3')
@@ -154,7 +156,8 @@ applyVersion(ctrl, info) {
 appliedVersionLookUp(
     location,
     ignoreFiles := Map(
-        'wndmode.dll', 1
+        'wndmode.dll', 1,
+        'windmode.dll', 1
     )
 ) {
     matchVersion := ''

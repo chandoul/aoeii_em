@@ -13,7 +13,7 @@ haiGui.addButtonEx('xm w400', 'Reset Trial Period', , resetTrial)
 haiGui.showEx(, 1)
 
 resetTrial(*) {
-    For setting in ['~ WIN7RTM RUNASADMIN', '~ WIN8RTM RUNASADMIN'] {
+    For setting in ['WIN7RTM RUNASADMIN', 'WIN8RTM RUNASADMIN'] {
         If !FileExist(haiPath) {
             MsgBoxEx("Hide All IP not found!`nYou must install Hide All IP first.", 'Hide All IP Trial Reset', , 0x30)
             Return
@@ -61,6 +61,7 @@ resetTrial(*) {
 
 ProcessCloseEx(PN) {
     If ProcessExist(PN) {
+        ProcessClose(PN)
         ProcessWaitClose(PN, 3)
     }
 }
