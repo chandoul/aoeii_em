@@ -40,6 +40,7 @@ Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubd
 Source: "..\externals\*"; DestDir: "{app}\externals"; Flags: ignoreversion recursesubdirs
 Source: "..\libs\*"; DestDir: "{app}\libs"; Flags: ignoreversion recursesubdirs
 Source: "..\screenshots\*"; DestDir: "{app}\screenshots"; Flags: ignoreversion recursesubdirs
+Source: "..\webview2\*"; DestDir: "{app}\webview2"; Flags: ignoreversion recursesubdirs
 // autohotkey
 Source: "..\tools\ahk\ahk.ahk"; DestDir: "{app}\tools\ahk"; Flags: ignoreversion
 Source: "..\tools\ahk\default.json"; DestDir: "{app}\tools\ahk"; Flags: ignoreversion
