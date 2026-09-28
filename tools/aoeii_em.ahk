@@ -133,7 +133,7 @@ performGameAnalyze(*) {
         infoGui := GuiEx(, 'Package Download')
         infoGui.initiate(0, , 0)
         infoGui.OnEvent('Close', (*) => Reload())
-        infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundFFAD59', '...')
+        infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundF4F4F5 c27272A', '...')
         InfoBar := infoGui.AddProgress('-smooth wp h18 Range1-6')
     }
 

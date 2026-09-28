@@ -243,7 +243,7 @@ Class Base {
             infoGui := GuiEx(, 'Package Download')
             infoGui.initiate(0, , 0)
             infoGui.OnEvent('Close', (*) => Reload())
-            infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundFFAD59', '...')
+            infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundF4F4F5 c27272A', '...')
             InfoBar := infoGui.AddProgress('-smooth wp h18')
         }
 
@@ -306,7 +306,7 @@ Class Base {
             infoGui.initiate(0, , 0)
             SplitPath(package, &name)
             size := FileGetSize(package, 'M')
-            infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center r3 -VScroll BackgroundFFAD59',
+            infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center r3 -VScroll BackgroundF4F4F5 c27272A',
                 (!info.text) ? 'Please Wait...`nExtracting ' name '`n( ' size ' MB )' : info.text
             )
             InfoBar := infoGui.AddProgress('wp h18 0x00000008')
@@ -590,13 +590,16 @@ Class Base {
 Class Button {
     workDirectory => Base().workDirectory
     default => [
-        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
+        [0x171717, , 0xFFFFFF, 6, 0x171717],
+        [0x343434, , 0xFFFFFF, 6, 0x343434],
+        [0x000000, , 0xFFFFFF, 6, 0x000000],
+        [0xF4F4F5, , 0x71717A, 6, 0xE4E4E7]
     ]
     checkedDisabled => [
-        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF],
-        [],
-        [],
-        [This.workDirectory '\assets\000_50212_check.bmp', , 0xFFFFFF]
+        [0x171717, , 0xFFFFFF, 6, 0x171717],
+        [0x343434, , 0xFFFFFF, 6, 0x343434],
+        [0x000000, , 0xFFFFFF, 6, 0x000000],
+        [0xF4F4F5, , 0x71717A, 6, 0xE4E4E7]
     ]
     cbChecked => [
         [This.workDirectory '\assets\cb2\checked.png']
@@ -609,13 +612,12 @@ Class Button {
 
 Class GuiEx extends Gui {
     workDirectory => Base().workDirectory
-    backImage => This.workDirectory '\assets\000_50127.bmp'
     transColor => 0xFFFFFE
     checkedImage => This.workDirectory '\assets\cb2\checked.png'
     uncheckedImage => This.workDirectory '\assets\cb2\unchecked.png'
     click => This.workDirectory '\assets\wav\50300.wav'
     initiate(qA := 1, Scrollable := 0, footer := 1, header := 0) {
-        This.BackColor := 0xFFFFFF
+        This.BackColor := 0xFAFAF8
         If qA
             This.OnEvent('Close', (*) => ExitApp())
         This.MarginX := This.MarginY := 20
@@ -680,7 +682,7 @@ Class GuiEx extends Gui {
         If This.footer
             This.addAOEFooter(app)
         This.Show(options)
-        ; Handling the background image (repeat x, y)
+        ; Draw the shared background with subtle topographic contours.
         If backImage {
             This.GetPos(&X, &Y, &bWidth, &bHeight)
             For Control in this {
@@ -698,32 +700,27 @@ Class GuiEx extends Gui {
             This.backGroundImage.Move(0, 0, bWidth, bHeight)
             This.backGroundImage.Redraw()
 
-            fBitmap := Gdip_CreateBitmapFromFile(This.backImage)
-            Gdip_GetDimensions(fBitmap, &iWidth, &iHeight)
-
             bBitmap := Gdip_CreateBitmap(bWidth, bHeight)
             G := Gdip_GraphicsFromImage(bBitmap)
+            Gdip_GraphicsClear(G, 0xFFFAFAF8)
 
-            vDrawTimes := bHeight > iHeight ? (bHeight // iHeight) + 1 : 1
-            hDrawTimes := bWidth > iWidth ? (bWidth // iWidth) + 1 : 1
-
-            Loop vDrawTimes {
-                y := (A_Index - 1) * iHeight
-                Loop hDrawTimes {
-                    x := (A_Index - 1) * iWidth
-                    Gdip_DrawImage(G, fBitmap, x, y, iWidth, iHeight)
-                }
+            pPen := Gdip_CreatePen(0x14736855, 1)
+            Loop 8 {
+                inset := A_Index * 24
+                Gdip_DrawEllipse(G, pPen, -bWidth * 0.28 - inset, bHeight * 0.52 - inset, bWidth * 0.7 + inset * 2, bHeight * 0.62 + inset * 2)
+                Gdip_DrawEllipse(G, pPen, bWidth * 0.72 - inset, -bHeight * 0.3 - inset, bWidth * 0.58 + inset * 2, bHeight * 0.65 + inset * 2)
             }
+            Gdip_DeletePen(pPen)
 
-            pBrush := Gdip_BrushCreateSolid(0xff480000)
+            pBrush := Gdip_BrushCreateSolid(0xffe4e4e7)
 
-            Gdip_FillRectangle(G, pBrush, 0, 0, bWidth, 3)
-            Gdip_FillRectangle(G, pBrush, bWidth - 3, 0, 3, bHeight)
-            Gdip_FillRectangle(G, pBrush, 0, 0, 3, bHeight)
-            Gdip_FillRectangle(G, pBrush, 0, bHeight - 3, bWidth, 3)
+            Gdip_FillRectangle(G, pBrush, 0, 0, bWidth, 1)
+            Gdip_FillRectangle(G, pBrush, bWidth - 1, 0, 1, bHeight)
+            Gdip_FillRectangle(G, pBrush, 0, 0, 1, bHeight)
+            Gdip_FillRectangle(G, pBrush, 0, bHeight - 1, bWidth, 1)
 
-            pBrush2 := Gdip_CreateLineBrushFromRect(0, 0, bWidth, 25, 0xff804000, 0xffDB6D00, 0)
-            Gdip_FillRectangle(G, pBrush2, 3, 3, bWidth - 6, 25)
+            pBrush2 := Gdip_BrushCreateSolid(0xfff4f4f5)
+            Gdip_FillRectangle(G, pBrush2, 1, 1, bWidth - 2, 27)
 
             OnMessage(0x0201, WM_LBUTTONDOWN)
             WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
@@ -750,6 +747,8 @@ Class GuiEx extends Gui {
             hBitmap := Gdip_CreateHBITMAPFromBitmap(bBitmap)
             This.backGroundImage.Value := 'HBITMAP:* ' hBitmap
 
+            Gdip_DeleteBrush(pBrush)
+            Gdip_DeleteBrush(pBrush2)
             Gdip_DeleteGraphics(G)
             Gdip_DisposeImage(bBitmap)
 
@@ -826,7 +825,7 @@ Class GuiEx extends Gui {
                 B.Update(Button().cbChecked)
             } Else {
                 B.Update(Button().cbUnChecked)
-                T.Opt('c4C4C4C')
+                T.Opt('c3F3F46')
             }
             T.Redraw()
             B.Redraw()
@@ -896,8 +895,8 @@ Class GuiEx extends Gui {
         This.addPictureEx('yp', 'fe_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : '')
         gameLocation := Base().gameLocation
         If Game().isValidGameDirectory(gameLocation)
-            This.ft := This.AddEdit('BackgroundBlack yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
-        Else This.ft := This.AddEdit('Backgroundff0000 yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
+            This.ft := This.AddEdit('yp+10 x+20 c3F3F46 w280 -E0x200 h22 Center ReadOnly BackgroundF4F4F5', Base().gameLocation)
+        Else This.ft := This.AddEdit('yp+10 x+20 cB91C1C w280 -E0x200 h22 Center ReadOnly BackgroundFEE2E2', Base().gameLocation)
         This.MarginY := 20
         ;If app && app.HasMethod('ensurePackage') {
         ;    This.SetFont('s8')
@@ -965,7 +964,7 @@ Class MsgBoxEx {
             }
         }
 
-        This.hText := This.msgGui.AddEdit('xm Center ReadOnly BackgroundE1B15A -E0x200 Border -VScroll', '`n' Text '`n')
+        This.hText := This.msgGui.AddEdit('xm Center ReadOnly BackgroundF4F4F5 c27272A -E0x200 Border -VScroll', '`n' Text '`n')
 
         Switch Function {
             Case 0:
@@ -1525,7 +1524,7 @@ Class HoldOn {
         This.infoGui := GuiEx('-SysMenu', This.name)
         This.infoGui.initiate(0, , 0, 0)
         This.infoGui.addGif('xm+90', 'bored.gif')
-        This.infoGui.AddText('BackgroundTrans xm w400 Center cRed', 'Please Wait...')
+        This.infoGui.AddText('BackgroundTrans xm w400 Center c171717', 'Please Wait...')
         This.infoGui.SetFont('s9')
         This.infoGui.AddText('BackgroundTrans xm w400 Center', text)
         This.infoGui.showEx(, 1)

@@ -16,7 +16,7 @@ gameLocation := verapp.gameLocation
 versionGui := GuiEx(, verapp.name)
 versionGui.initiate()
 
-versionGui.AddText('BackgroundTrans xm ym+10 cRed w150 Center h30', 'The Age of Kings').SetFont('Bold s12')
+versionGui.AddText('BackgroundTrans xm ym+10 c171717 w150 Center h30', 'The Age of Kings').SetFont('Bold s12')
 versionGui.AddPictureEx('xp+59 yp+30', 'aok.png', launchGame)
 versionGui.AddText('BackgroundTrans xp-59 yp+35 w1 h1')
 
@@ -34,7 +34,7 @@ For AOK in avVerions['aok'] {
     versions['Version'].Push(H)
 }
 
-versionGui.AddText('BackgroundTrans cBlue ym+10 w150 Center h30', 'The Conquerors').SetFont('Bold s12')
+versionGui.AddText('BackgroundTrans c171717 ym+10 w150 Center h30', 'The Conquerors').SetFont('Bold s12')
 versionGui.AddPictureEx('xp+59 yp+30', 'aoc.png', launchGame)
 versionGui.AddText('BackgroundTrans xp-59 yp+35 w1 h1')
 
@@ -45,7 +45,7 @@ For AOC in avVerions['aoc'] {
     versions['Version'].Push(H)
 }
 
-versionGui.AddText('BackgroundTrans cGreen ym+10 w150 Center h30', 'Forgotten Empires').SetFont('Bold s12')
+versionGui.AddText('BackgroundTrans c171717 ym+10 w150 Center h30', 'Forgotten Empires').SetFont('Bold s12')
 versionGui.AddPictureEx('xp+59 yp+30', 'fe.png', launchGame)
 versionGui.AddText('BackgroundTrans xp-59 yp+35 w1 h1')
 

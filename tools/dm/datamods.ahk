@@ -15,10 +15,10 @@ dmGui := GuiEx(, dmapp.name)
 dmGui.initiate()
 
 dmGui.AddText('xm ym+20 w200 BackgroundTrans', 'Search')
-search := dmGui.AddEdit('BackgroundBlack cWhite -E0x200 w200')
+search := dmGui.AddEdit('BackgroundFFFFFF c27272A -E0x200 w200')
 search.OnEvent('Change', quickSearch)
 
-modsList := dmGui.AddListBox('wp r20 BackgroundE1B15A -E0x200')
+modsList := dmGui.AddListBox('wp r20 BackgroundF4F4F5 -E0x200')
 modsList.OnEvent('Change', showInfo)
 
 quickSearch(ctrl, info) {
@@ -38,7 +38,7 @@ For modName in dmapp.dmPackages {
 
 dmThumbnail := dmGui.addPictureEx('ym+37 Border')
 dmGui.SetFont('s8')
-dmDescription := dmGui.addEdit('ym+37 w300 hp Backgrounddcb670 ReadOnly -E0x200')
+dmDescription := dmGui.addEdit('ym+37 w300 hp BackgroundFFFFFF c27272A ReadOnly -E0x200')
 dmGui.SetFont('s10')
 dmInstall := dmGui.addButtonEx('xp-170 yp+140 w225', 'Install', , updateDM)
 ;dmUpdateInstall := dmGui.addButtonEx('wp yp', 'Update and Install', , clearDM)
