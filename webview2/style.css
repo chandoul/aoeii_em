@@ -23,7 +23,7 @@ body {
 }
 
 body {
-  background: #f4f4f5;
+  background: #e9e8e3;
 }
 
 button {
@@ -42,7 +42,12 @@ button {
   padding: 20px;
   border: 1px solid #e4e4e7;
   border-radius: 10px;
-  background: #fff;
+  background:
+    repeating-radial-gradient(ellipse at 11% 80%, transparent 0 37px, rgba(83, 91, 69, .035) 38px 39px, transparent 40px 52px),
+    repeating-radial-gradient(ellipse at 90% 20%, transparent 0 32px, rgba(116, 104, 76, .025) 33px 34px, transparent 35px 47px),
+    radial-gradient(ellipse at 12% 82%, rgba(93, 111, 83, .09), transparent 42%),
+    radial-gradient(ellipse at 90% 18%, rgba(188, 174, 135, .11), transparent 44%),
+    linear-gradient(145deg, #fff 0%, #fbfaf7 56%, #f2f1ed 100%);
 }
 
 .topbar {
@@ -50,7 +55,13 @@ button {
   grid-template-columns: 100px minmax(0, 1fr) 100px;
   align-items: start;
   gap: 20px;
+  cursor: grab;
   -webkit-app-region: drag;
+}
+
+.topbar:active,
+.heading:active {
+  cursor: grabbing;
 }
 
 .app-button {
@@ -150,6 +161,8 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: grab;
+  -webkit-app-region: drag;
 }
 
 .heading h1 {
@@ -168,6 +181,7 @@ button {
   z-index: 1;
   height: 24px;
   font-size: 11px;
+  -webkit-app-region: no-drag;
 }
 
 .repair-button {
@@ -342,5 +356,4 @@ button {
   .tools {
     column-gap: 10px;
   }
-
 }
