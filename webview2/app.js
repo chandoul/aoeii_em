@@ -31,7 +31,7 @@ function renderState(state) {
   tools.replaceChildren();
   for (const tool of state.tools) {
     const button = document.createElement("button");
-    button.className = "wood-button tool-button";
+    button.className = "app-button tool-button";
     button.type = "button";
     button.textContent = tool.title;
     button.dataset.tool = tool.key;

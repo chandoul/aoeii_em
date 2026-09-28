@@ -1,10 +1,11 @@
 :root {
   color-scheme: light;
   font-family: "Segoe UI", Arial, sans-serif;
-  color: #1c1309;
-  background: #d6943e;
+  color: #171717;
+  background: #f4f4f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -22,7 +23,7 @@ body {
 }
 
 body {
-  background: #e6b85f url("../assets/000_50127.bmp") repeat;
+  background: #f4f4f5;
 }
 
 button {
@@ -39,20 +40,9 @@ button {
   height: 100%;
   min-height: 400px;
   padding: 20px;
-  border: 3px solid #480000;
-  border-top: 3px solid #b76608;
-  background: transparent;
-}
-
-.app::before {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  left: 3px;
-  height: 25px;
-  background: linear-gradient(90deg, #804000, #db6d00);
-  content: "";
-  pointer-events: none;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  background: #fff;
 }
 
 .topbar {
@@ -63,14 +53,33 @@ button {
   -webkit-app-region: drag;
 }
 
-.wood-button {
-  border: 0;
-  background: #6f3900 url("../assets/000_50212.bmp") center / 100% 100% no-repeat;
+.app-button {
+  border: 1px solid #171717;
+  border-radius: 6px;
+  background: #171717;
   color: #fff;
-  font-weight: 700;
-  text-shadow: 0 1px 1px #261000;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
   -webkit-app-region: no-drag;
+}
+
+.app-button:hover:not(:disabled) {
+  border-color: #404040;
+  background: #404040;
+}
+
+.app-button:active:not(:disabled) {
+  border-color: #000;
+  background: #000;
+}
+
+.app-button:focus-visible,
+.game-button:focus-visible,
+.footer-game:focus-visible,
+.selected-game:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
 }
 
 .window-close {
@@ -78,31 +87,37 @@ button {
   top: 7px;
   right: 7px;
   z-index: 2;
-  width: 20px;
-  height: 18px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  font-size: 11px;
+  border-color: transparent;
+  background: transparent;
+  color: #52525b;
+  font-size: 13px;
+  font-weight: 400;
 }
 
-.wood-button:hover:not(:disabled) {
-  filter: brightness(1.14);
-}
-
-.wood-button:active:not(:disabled) {
-  filter: brightness(.86);
-}
-
-.wood-button:focus-visible,
-.game-button:focus-visible,
-.footer-game:focus-visible,
-.selected-game:focus-visible {
-  outline: 2px solid #522800;
-  outline-offset: 2px;
+.window-close:hover:not(:disabled) {
+  border-color: #171717;
+  background: #171717;
+  color: #fff;
 }
 
 .utility-button {
   width: 100px;
   height: 28px;
+  border-color: #e4e4e7;
+  background: #fff;
+  color: #27272a;
+  font-size: 12px;
+}
+
+.utility-button:hover:not(:disabled) {
+  border-color: #a1a1aa;
+  background: #f4f4f5;
+  color: #171717;
 }
 
 .selected-game {
@@ -111,10 +126,11 @@ button {
   height: 31px;
   padding: 0 8px;
   border: 0;
+  border-radius: 6px;
   background: transparent;
-  color: #171009;
+  color: #52525b;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.25;
   text-align: center;
   text-overflow: ellipsis;
@@ -122,6 +138,11 @@ button {
   white-space: nowrap;
   cursor: pointer;
   -webkit-app-region: no-drag;
+}
+
+.selected-game:hover {
+  background: #f4f4f5;
+  color: #171717;
 }
 
 .heading {
@@ -133,9 +154,10 @@ button {
 
 .heading h1 {
   margin: 0;
-  color: #522800;
+  color: #171717;
   font-size: clamp(18px, 2.3vw, 24px);
-  font-weight: 700;
+  font-weight: 650;
+  letter-spacing: -.035em;
   text-align: center;
   -webkit-app-region: drag;
 }
@@ -149,12 +171,12 @@ button {
 }
 
 .repair-button {
-  left: 21%;
+  left: 0;
   width: 82px;
 }
 
 .update-button {
-  right: 21%;
+  right: 0;
   width: 70px;
 }
 
@@ -171,10 +193,17 @@ button {
   place-items: center;
   width: min(128px, 28%);
   height: 100%;
-  padding: 2px;
-  border: 0;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: transparent;
   cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.game-button:hover:not(:disabled) {
+  border-color: #e4e4e7;
+  background: #fafafa;
 }
 
 .game-button img {
@@ -182,7 +211,6 @@ button {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 2px 2px #432000);
 }
 
 .game-button:disabled,
@@ -192,13 +220,13 @@ button {
 
 .game-button:disabled img,
 .footer-game:disabled img {
-  filter: grayscale(1) opacity(.65);
+  filter: grayscale(1) opacity(.45);
 }
 
 .dpi-warning {
   align-self: center;
   margin: 0;
-  color: #b00000;
+  color: #b91c1c;
   font-size: 11px;
   font-style: italic;
   text-align: center;
@@ -235,8 +263,7 @@ button {
 .footer-rule {
   height: 1px;
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, .9);
-  box-shadow: 0 1px 1px rgba(52, 29, 0, .45);
+  background: #e4e4e7;
 }
 
 .footer-content {
@@ -259,9 +286,15 @@ button {
   width: 30px;
   height: 30px;
   padding: 0;
-  border: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   cursor: pointer;
+}
+
+.footer-game:hover:not(:disabled) {
+  border-color: #e4e4e7;
+  background: #f4f4f5;
 }
 
 .footer-game img {
@@ -272,13 +305,15 @@ button {
 
 .footer-path {
   min-width: 0;
-  height: 21px;
-  padding: 3px 8px;
+  height: 26px;
+  padding: 5px 10px;
   overflow: hidden;
-  background: #080808;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  background: #f4f4f5;
+  color: #3f3f46;
+  font-size: 11px;
+  font-weight: 500;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -289,9 +324,8 @@ button {
   right: 0;
   bottom: 1px;
   margin: 0;
-  color: #ffe4b5;
+  color: #71717a;
   font-size: 10px;
-  text-shadow: 0 1px 1px #000;
   text-align: right;
 }
 
@@ -309,11 +343,4 @@ button {
     column-gap: 10px;
   }
 
-  .repair-button {
-    left: 2%;
-  }
-
-  .update-button {
-    right: 2%;
-  }
 }
