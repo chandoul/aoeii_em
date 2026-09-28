@@ -3,138 +3,112 @@
 
 #Include ..\Libs\Base.ahk
 #Include ..\libs\JSON.ahk
+#Include ..\libs\webview2\WebViewToo.ahk
 
 aoeiiapp := Base()
 aoeiiapp.__Startup()
 gameapp := Game()
 
-features := Map()
-
-aoeiiGui := GuiEx(, aoeiiapp.name)
-aoeiiGui.aoemain := true
-aoeiiGui.initiate()
-
-about := aoeiiGui.AddButtonEx(
-    'xm ym+20 w100', 'About', , (*) => MsgBoxEx(
-        'A homemade tool humbly made by Smile, enjoy!'
-        . '`n> Description: ' aoeiiapp.description
-        . '`n> Scripting Language: AutoHotkey'
-        . '`n> Name: ' aoeiiapp.name
-        . '`n> Version: ' aoeiiapp.version
-        . '`n> License: ' aoeiiapp.license
-        , aoeiiapp.name, , 0x40
-    ))
-
-aoeiiGui.SetFont('Bold s10 Bold')
-
-gameLocation := aoeiiGui.AddText('x+20 yp Center ReadOnly -E0x200 BackgroundTrans h35', '...')
-gameLocation.OnEvent('Click', (*) => Run(aoeiiapp.gameLocation))
-
-aoeiiGui.SetFont('s10')
-
-reloadApp := aoeiiGui.AddButtonEx('yp w100', 'Reload', , (*) => Reload())
-
-aoeiiGui.SetFont('Bold s18')
-title := aoeiiGui.AddText('xm c522800 Center BackgroundTrans y70', aoeiiapp.name ' v' aoeiiapp.version)
-
-aoeiiGui.SetFont('Bold s8')
-perform := aoeiiGui.addButtonEx('xm y+10', 'Game Repair', , performGameAnalyze)
-appUpdate := aoeiiGui.addButtonEx('x+5 w70', 'Update?', , updateCheck)
-
-gamepicaok := aoeiiGui.AddPictureEx('xm+90 y+5', 'aoklogo.png')
-gamepicaoc := aoeiiGui.AddPictureEx('x+20', 'aoclogo.png')
-gamepichd := aoeiiGui.AddPictureEx('x+20', 'hdlogo.png')
-
-aoeiiGui.SetFont('Bold s10')
-
-if A_ScreenDPI > 96 {
-    dpiNotice := aoeiiGui.AddText('xm y+10 Center cff0000 BackgroundTrans', '!Notice: Your screen DPI is higher than 96 ( 100% ), some game UI elements may not be displayed correctly.')
-    dpiNotice.SetFont('italic')
-}
-aoeiiGui.MarginY := 20
-index := 0
+toolItems := []
 For key, tool in aoeiiapp.tools {
-    if key = '00_ungame'
-        Continue
-    if ++index = 2
-        aoeiiGui.MarginY := 10
-    h := aoeiiGui.addButtonEx('x' (!Mod(index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
-    features[h] := { run: tool['file'], workdir: tool['workdir'] }
+    if key != '00_ungame'
+        toolItems.Push(Map('key', key, 'title', tool['title']))
 }
-aoeiiGui.MarginY := 20
 
-launchSubApp(h, *) => Run(Format('{}', features[h].run), features[h].workdir)
-
-aoeiiGui.ShowEx(, 1)
+webViewDataDir := EnvGet('LOCALAPPDATA') '\aoeii_em\WebView2'
+webViewLoader := aoeiiapp.workDirectory '\libs\webview2\' (A_PtrSize * 8) 'bit\WebView2Loader.dll'
+if !FileExist(webViewLoader)
+    throw Error('The WebView2 loader is missing: ' webViewLoader)
+DirCreate(webViewDataDir)
+aoeiiGui := WebViewGui('-Caption +Resize', aoeiiapp.name, , {
+    DefaultWidth: 820,
+    DefaultHeight: 490,
+    DataDir: webViewDataDir,
+    DllPath: webViewLoader
+})
+aoeiiGui.OnEvent('Close', (*) => ExitApp())
+aoeiiGui.Control.wv.add_WebMessageReceived(handleWebMessage)
+aoeiiGui.Control.BrowseFolder(aoeiiapp.workDirectory, 'aoeii.localhost')
+aoeiiGui.Control.Navigate('https://aoeii.localhost/webview2/index.html')
+aoeiiGui.Show()
 
 aoeiiapp.isGameFolderSelected()
 
-aoeiiGui.GetPos(, , &W, &H)
-
-title.GetPos(&tX, &tY, &tWidth)
-title.Move((W - tWidth - 20) / 2)
-title.Redraw()
-title.GetPos(&tX, &tY, &tWidth)
-perform.Move(tX, tY + 35)
-appUpdate.Move(tX + tWidth - 70, tY + 35)
-appUpdate.Redraw()
-
-gamepicX := (W - 424 - 20) / 2
-gamepicaok.Move(gamepicX)
-gamepicaok.Redraw()
-gamepicaoc.Move(gamepicX + 148)
-gamepicaoc.Redraw()
-gamepichd.Move(gamepicX + 148 * 2)
-gamepichd.Redraw()
-
-if IsSet(dpiNotice) {
-    dpiNotice.Move(, , W)
-    dpiNotice.Redraw()
+sendUiMessage(message) {
+    aoeiiGui.Control.wv.PostWebMessageAsJson(JSON.Dump(message))
 }
 
-gameLocation.Move(, , W - 56 - 240)
-gameLocation.GetPos(&X, &Y, &Width)
-reloadApp.Move(X + Width + 20, Y)
+handleWebMessage(sender, args) {
+    request := JSON.Load(args.WebMessageAsJson)
+    if !(request is Map) || !request.Has('action')
+        throw Error('Invalid message received from the WebView UI.')
 
-gameLocation.Text := 'The Selected Game @ "' aoeiiapp.gameLocation '"'
-
-; Game folder check
-MatrixGreyScale := "0.299|0.299|0.299|0|0|0.587|0.587|0.587|0|0|0.114|0.114|0.114|0|0|0|0|0|1|0|0|0|0|0|1"
-If !FileExist(aoeiiapp.gameLocation '\empires2.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\aoklogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepicaok.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
-} Else gamepicaok.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\empires2.exe', aoeiiapp.gameLocation))
-
-If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\aoclogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepicaoc.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
-} Else gamepicaoc.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe', aoeiiapp.gameLocation))
-
-If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\hdlogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepichd.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
-} Else gamepichd.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe', aoeiiapp.gameLocation))
+    switch request['action'] {
+        case 'ready':
+            sendUiMessage(Map(
+                'type', 'state',
+                'name', aoeiiapp.name,
+                'description', aoeiiapp.description,
+                'version', aoeiiapp.version,
+                'license', aoeiiapp.license,
+                'gameLocation', aoeiiapp.gameLocation,
+                'dpiWarning', A_ScreenDPI > 96,
+                'tools', toolItems,
+                'games', Map(
+                    'aok', !!FileExist(aoeiiapp.gameLocation '\empires2.exe'),
+                    'aoc', !!FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe'),
+                    'hd', !!FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe')
+                )
+            ))
+        case 'about':
+            MsgBoxEx(
+                'A homemade tool humbly made by Smile, enjoy!'
+                . '`n> Description: ' aoeiiapp.description
+                . '`n> Scripting Language: AutoHotkey'
+                . '`n> Name: ' aoeiiapp.name
+                . '`n> Version: ' aoeiiapp.version
+                . '`n> License: ' aoeiiapp.license
+                , aoeiiapp.name, , 0x40
+            )
+        case 'open-game-folder':
+            Run(aoeiiapp.gameLocation)
+        case 'reload':
+            Reload()
+        case 'close':
+            ExitApp()
+        case 'repair':
+            performGameAnalyze()
+        case 'update':
+            updateCheck()
+        case 'launch-tool':
+            key := request['key']
+            if !aoeiiapp.tools.Has(key) || key = '00_ungame'
+                throw Error('Unknown tool requested by the WebView UI: ' key)
+            tool := aoeiiapp.tools[key]
+            Run(Format('{}', tool['run']), tool['workdir'])
+        case 'launch-game':
+            switch request['key'] {
+                case 'aok':
+                    path := aoeiiapp.gameLocation '\empires2.exe'
+                case 'aoc':
+                    path := aoeiiapp.gameLocation '\age2_x1\age2_x1.exe'
+                case 'hd':
+                    path := aoeiiapp.gameLocation '\age2_x1\age2_x2.exe'
+                default:
+                    throw Error('Unknown game requested by the WebView UI: ' request['key'])
+            }
+            if FileExist(path)
+                Run(path, aoeiiapp.gameLocation)
+        default:
+            throw Error('Unsupported action received from the WebView UI: ' request['action'])
+    }
+}
 
 ; Update check
 updateCheck(*) {
-    appUpdate.TextEx := 'Checking...'
+    sendUiMessage(Map('type', 'update-status', 'checking', true))
     aoeiiapp.appUpdateCheck()
-    appUpdate.TextEx := 'Update?'
+    sendUiMessage(Map('type', 'update-status', 'checking', false))
 }
 
 performGameAnalyze(*) {
