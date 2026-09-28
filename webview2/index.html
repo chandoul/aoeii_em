@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Age of Empires II Easy Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="app" aria-label="Age of Empires II Easy Manager">
+    <button class="wood-button window-close" type="button" data-action="close" aria-label="Close">X</button>
+    <header class="topbar">
+      <button class="wood-button utility-button" type="button" data-action="about">About</button>
+      <button class="selected-game" type="button" data-action="open-game-folder">
+        <span id="selected-game">Loading selected game...</span>
+      </button>
+      <button class="wood-button utility-button" type="button" data-action="reload">Reload</button>
+    </header>
+
+    <section class="heading" aria-label="Application">
+      <button class="wood-button heading-action repair-button" type="button" data-action="repair">Game Repair</button>
+      <h1 id="app-title">Age of Empires II Easy Manager</h1>
+      <button class="wood-button heading-action update-button" type="button" data-action="update">Update?</button>
+    </section>
+
+    <section class="games" aria-label="Game editions">
+      <button class="game-button" type="button" data-game="aok" aria-label="Launch Age of Kings">
+        <img src="../assets/aoklogo.png" alt="Age of Kings">
+      </button>
+      <button class="game-button" type="button" data-game="aoc" aria-label="Launch The Conquerors">
+        <img src="../assets/aoclogo.png" alt="The Conquerors">
+      </button>
+      <button class="game-button" type="button" data-game="hd" aria-label="Launch HD Edition">
+        <img src="../assets/hdlogo.png" alt="Age of Empires II HD Edition">
+      </button>
+    </section>
+
+    <p id="dpi-warning" class="dpi-warning" hidden>
+      !Notice: Your screen DPI is higher than 96 (100%), some game UI elements may not be displayed correctly.
+    </p>
+
+    <section id="tools" class="tools" aria-label="Tools"></section>
+
+    <footer class="footer">
+      <div class="footer-rule"></div>
+      <div class="footer-content">
+        <div class="footer-games" aria-label="Quick launch">
+          <button class="footer-game" type="button" data-game="aok" aria-label="Launch Age of Kings">
+            <img src="../assets/aok_c.png" alt="">
+          </button>
+          <button class="footer-game" type="button" data-game="aoc" aria-label="Launch The Conquerors">
+            <img src="../assets/aoc_c.png" alt="">
+          </button>
+          <button class="footer-game" type="button" data-game="hd" aria-label="Launch HD Edition">
+            <img src="../assets/fe_c.png" alt="">
+          </button>
+        </div>
+        <div id="footer-path" class="footer-path" title="Selected game folder"></div>
+      </div>
+      <p id="connection-status" class="connection-status" role="status">Connecting to the application...</p>
+    </footer>
+  </main>
+</body>
+</html>
