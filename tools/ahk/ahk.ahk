@@ -10,7 +10,7 @@ ahkapp.__Startup()
 ahkGui := GuiEx(, ahkapp.name)
 ahkGui.initiate()
 
-ahkList := ahkGui.AddListView('xm ym+20 w600 r5 BackgroundF4F4F5 -E0x200', ['Hotkey', 'Comment'])
+ahkList := ahkGui.AddListView('xm ym+20 w600 r5 BackgroundE1B15A -E0x200', ['Hotkey', 'Comment'])
 ahkList.OnEvent('Click', showHotkey)
 HotkeyDef := readHotkey()
 script := "
@@ -48,11 +48,11 @@ ahkGui.addButtonEx('xm w100', 'Import', , import_v2_4_Hotkeys)
 ahkGui.addButtonEx('yp xm+500 w100', 'Save', , updateHotkeys)
 
 ahkGui.SetFont('s10')
-addHotName := ahkGui.AddEdit('xm w200 BackgroundFFFFFF c27272A -E0x200')
+addHotName := ahkGui.AddEdit('xm w200 Backgroundblack cWhite -E0x200')
 addHotName.OnEvent('Change', (*) => autoSave())
-addHotCom := ahkGui.AddEdit('w200 BackgroundFFFFFF c27272A -E0x200')
+addHotCom := ahkGui.AddEdit('w200 Backgroundblack cWhite -E0x200')
 addHotCom.OnEvent('Change', (*) => autoSave())
-addHotAction := ahkGui.AddEdit('w600 r10 BackgroundF4F4F5 c27272A -E0x200')
+addHotAction := ahkGui.AddEdit('w600 r10 Backgroundblack cYellow -E0x200')
 addHotAction.OnEvent('Change', (*) => autoSave())
 addHotAction.SetFont(, 'Consolas')
 

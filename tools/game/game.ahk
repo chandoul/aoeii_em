@@ -20,7 +20,7 @@ select := gameGui.addButtonEx('xm ym+20 w200', 'Select', , selectDirectory)
 
 gameGui.addButtonEx('w200 yp', 'Open the selected', , (*) => DirExist(gameDirectory.Value) ? Run(gameDirectory.Value '\') : '')
 
-gameDirectory := gameGui.AddEdit('c27272A xm ReadOnly w420 -E0x200 Border BackgroundF4F4F5 Center')
+gameDirectory := gameGui.AddEdit('cWhite xm ReadOnly w420 -E0x200 Border Background000000 Center')
 
 selectFromGR := gameGui.addButtonEx('xm w200', 'Select from GameRanger', , selectDirectoryGR)
 

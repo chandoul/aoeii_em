@@ -3,7 +3,6 @@
 
 #Include ..\Libs\Base.ahk
 #Include ..\libs\JSON.ahk
-#Include ..\libs\webview2\WebViewToo.ahk
 
 aoeiiapp := Base()
 aoeiiapp.__Startup()
@@ -39,7 +38,7 @@ aoeiiGui.SetFont('Bold s18')
 title := aoeiiGui.AddText('xm c522800 Center BackgroundTrans y70', aoeiiapp.name ' v' aoeiiapp.version)
 
 aoeiiGui.SetFont('Bold s8')
-perform := aoeiiGui.addButtonEx('xm y+10', 'Game Repair', , performGameAnalyze)
+perform := aoeiiGui.addButtonEx('xm y+10', 'Game Repair ( Beta )', , performGameAnalyze)
 appUpdate := aoeiiGui.addButtonEx('x+5 w70', 'Update?', , updateCheck)
 
 gamepicaok := aoeiiGui.AddPictureEx('xm+90 y+5', 'aoklogo.png')
@@ -48,7 +47,11 @@ gamepichd := aoeiiGui.AddPictureEx('x+20', 'hdlogo.png')
 
 aoeiiGui.SetFont('Bold s10')
 
-aoeiiGui.MarginY := 30
+if A_ScreenDPI > 96 {
+    dpiNotice := aoeiiGui.AddText('xm y+10 Center cff0000 BackgroundTrans', '!Notice: Your screen DPI is higher than 96 ( 100% ), some game UI elements may not be displayed correctly.')
+    dpiNotice.SetFont('italic')
+}
+aoeiiGui.MarginY := 20
 index := 0
 For key, tool in aoeiiapp.tools {
     if key = '00_ungame'
@@ -83,8 +86,11 @@ gamepicaoc.Move(gamepicX + 148)
 gamepicaoc.Redraw()
 gamepichd.Move(gamepicX + 148 * 2)
 gamepichd.Redraw()
-;gamepicde.Move(gamepicX + 132 * 3)
-;gamepicde.Redraw()
+
+if IsSet(dpiNotice) {
+    dpiNotice.Move(, , W)
+    dpiNotice.Redraw()
+}
 
 gameLocation.Move(, , W - 56 - 240)
 gameLocation.GetPos(&X, &Y, &Width)
@@ -126,9 +132,9 @@ If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe') {
 
 ; Update check
 updateCheck(*) {
-    sendUiMessage(Map('type', 'update-status', 'checking', true))
+    appUpdate.TextEx := 'Checking...'
     aoeiiapp.appUpdateCheck()
-    sendUiMessage(Map('type', 'update-status', 'checking', false))
+    appUpdate.TextEx := 'Update?'
 }
 
 performGameAnalyze(*) {
@@ -153,7 +159,7 @@ performGameAnalyze(*) {
         infoGui := GuiEx(, 'Package Download')
         infoGui.initiate(0, , 0)
         infoGui.OnEvent('Close', (*) => Reload())
-        infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundF4F4F5 c27272A', '...')
+        infoText := infoGui.AddEdit('-E0x200 Border ReadOnly xm ym+20 w350 Center -VScroll BackgroundFFAD59', '...')
         InfoBar := infoGui.AddProgress('-smooth wp h18 Range1-6')
     }
 
@@ -234,7 +240,7 @@ performGameAnalyze(*) {
     }
     InfoBar.Value += 1
     infoGui.Hide()
-    
+
     MsgBoxEx(
         'Verification is done, you should be able to play your game normally by now!'
         , aoeiiapp.name, , 0x40

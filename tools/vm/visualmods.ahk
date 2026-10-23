@@ -13,10 +13,10 @@ vmGui := GuiEx(, vmapp.name)
 vmGui.initiate()
 
 vmGui.AddText('xm ym+20 w200 BackgroundTrans', 'Search')
-search := vmGui.AddEdit('BackgroundFFFFFF c27272A -E0x200 w200')
+search := vmGui.AddEdit('BackgroundBlack cWhite -E0x200 w200')
 search.OnEvent('Change', vmQuickSearch)
 
-modsList := vmGui.AddListBox('wp r20 BackgroundF4F4F5 -E0x200')
+modsList := vmGui.AddListBox('wp r20 BackgroundE1B15A -E0x200')
 modsList.OnEvent('Change', showVMInfo)
 
 vmQuickSearch(ctrl, info) {
@@ -35,7 +35,7 @@ Loop Files, vmapp.vmLocation '\*', 'D' {
 }
 vmThumbnail := vmGui.addPictureEx('ym+37 Border')
 vmGui.SetFont('s8')
-vmDescription := vmGui.addEdit('ym+37 w300 hp BackgroundFFFFFF c27272A ReadOnly -E0x200')
+vmDescription := vmGui.addEdit('ym+37 w300 hp Backgrounddcb670 ReadOnly -E0x200')
 vmGui.SetFont('s10')
 vmInstall := vmGui.addButtonEx('xp-170 yp+140 w225', 'Install', , updateVM)
 vmUninstall := vmGui.addButtonEx('wp yp', 'Uninstall', , updateVM)
