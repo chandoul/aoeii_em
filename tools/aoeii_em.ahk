@@ -38,7 +38,7 @@ aoeiiGui.SetFont('Bold s18')
 title := aoeiiGui.AddText('xm c522800 Center BackgroundTrans y70', aoeiiapp.name ' v' aoeiiapp.version)
 
 aoeiiGui.SetFont('Bold s8')
-perform := aoeiiGui.addButtonEx('xm y+10', 'Game Repair ( Beta )', , performGameAnalyze)
+perform := aoeiiGui.addButtonEx('xm y+10 Disabled', 'Game Repair ( Beta )', , performGameAnalyze)
 appUpdate := aoeiiGui.addButtonEx('x+5 w70', 'Update?', , updateCheck)
 
 gamepicaok := aoeiiGui.AddPictureEx('xm+90 y+5', 'aoklogo.png')
@@ -51,6 +51,7 @@ if A_ScreenDPI > 96 {
     dpiNotice := aoeiiGui.AddText('xm y+10 Center cff0000 BackgroundTrans', '!Notice: Your screen DPI is higher than 96 ( 100% ), some game UI elements may not be displayed correctly.')
     dpiNotice.SetFont('italic')
 }
+
 aoeiiGui.MarginY := 20
 index := 0
 For key, tool in aoeiiapp.tools {
@@ -60,75 +61,78 @@ For key, tool in aoeiiapp.tools {
         aoeiiGui.MarginY := 10
     h := aoeiiGui.addButtonEx('x' (!Mod(index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
     features[h] := { run: tool['file'], workdir: tool['workdir'] }
+    if !FileExist(tool['file'])
+        h.Enabled := false
 }
 aoeiiGui.MarginY := 20
 
 launchSubApp(h, *) => Run(Format('{}', features[h].run), features[h].workdir)
 
-aoeiiGui.ShowEx(, 1)
-
 aoeiiapp.isGameFolderSelected()
 
-aoeiiGui.GetPos(, , &W, &H)
+appinterfaceUpdate() {
+    aoeiiGui.GetPos(, , &W, &H)
 
-title.GetPos(&tX, &tY, &tWidth)
-title.Move((W - tWidth - 20) / 2)
-title.Redraw()
-title.GetPos(&tX, &tY, &tWidth)
-perform.Move(tX, tY + 35)
-appUpdate.Move(tX + tWidth - 70, tY + 35)
-appUpdate.Redraw()
+    title.GetPos(&tX, &tY, &tWidth)
+    title.Move((W - tWidth - 20) / 2)
+    title.Redraw()
+    title.GetPos(&tX, &tY, &tWidth)
+    perform.Move(tX, tY + 35)
+    appUpdate.Move(tX + tWidth - 70, tY + 35)
+    appUpdate.Redraw()
 
-gamepicX := (W - 424 - 20) / 2
-gamepicaok.Move(gamepicX)
-gamepicaok.Redraw()
-gamepicaoc.Move(gamepicX + 148)
-gamepicaoc.Redraw()
-gamepichd.Move(gamepicX + 148 * 2)
-gamepichd.Redraw()
+    gamepicX := (W - 424 - 20) / 2
+    gamepicaok.Move(gamepicX)
+    gamepicaok.Redraw()
+    gamepicaoc.Move(gamepicX + 148)
+    gamepicaoc.Redraw()
+    gamepichd.Move(gamepicX + 148 * 2)
+    gamepichd.Redraw()
 
-if IsSet(dpiNotice) {
-    dpiNotice.Move(, , W)
-    dpiNotice.Redraw()
+    if IsSet(dpiNotice) {
+        dpiNotice.Move(, , W)
+        dpiNotice.Redraw()
+    }
+
+    gameLocation.Move(, , W - 56 - 240)
+    gameLocation.GetPos(&X, &Y, &Width)
+    gameLocation.Redraw()
+    reloadApp.Move(X + Width + 20, Y)
 }
-
-gameLocation.Move(, , W - 56 - 240)
-gameLocation.GetPos(&X, &Y, &Width)
-reloadApp.Move(X + Width + 20, Y)
 
 gameLocation.Text := 'The Selected Game @ "' aoeiiapp.gameLocation '"'
 
 ; Game folder check
-MatrixGreyScale := "0.299|0.299|0.299|0|0|0.587|0.587|0.587|0|0|0.114|0.114|0.114|0|0|0|0|0|1|0|0|0|0|0|1"
-If !FileExist(aoeiiapp.gameLocation '\empires2.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\aoklogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepicaok.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
-} Else gamepicaok.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\empires2.exe', aoeiiapp.gameLocation))
+If !FileExist(aoeiiapp.gameLocation '\empires2.exe')
+    aoeiiapp.grayOutImage(aoeiiapp.workDirectory '\assets\aoklogo.png', gamepicaok)
+Else gamepicaok.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\empires2.exe', aoeiiapp.gameLocation))
 
-If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\aoclogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepicaoc.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
-} Else gamepicaoc.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe', aoeiiapp.gameLocation))
+If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe')
+    aoeiiapp.grayOutImage(aoeiiapp.workDirectory '\assets\aoclogo.png', gamepicaoc)
+Else gamepicaoc.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\age2_x1\age2_x1.exe', aoeiiapp.gameLocation))
 
 If !FileExist(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe') {
-    pBitmap := Gdip_CreateBitmapFromFile(aoeiiapp.workDirectory '\assets\hdlogo.png')
-    graphic := Gdip_GraphicsFromImage(pBitmap)
-    Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    gamepichd.value := "HBITMAP:*" hBitmap
-    Gdip_DeleteGraphics(graphic)
-    Gdip_DisposeImage(pBitmap)
+    aoeiiapp.grayOutImage(aoeiiapp.workDirectory '\assets\hdlogo.png', gamepichd)
 } Else gamepichd.OnEvent('click', (*) => Run(aoeiiapp.gameLocation '\age2_x1\age2_x2.exe', aoeiiapp.gameLocation))
+
+aoeiiMiniGui := GuiEx(, aoeiiapp.name)
+aoeiiMiniGui.aoemain := true
+aoeiiMiniGui.initiate(, , 0)
+aoeiiMiniGui.SetFont('s12')
+aoeiiMiniGui.addButtonEx(
+    'ym+25 xm w360 h100', 'Enhance / Update My Game', , performGameAnalyze
+)
+aoeiiMiniGui.SetFont('s8')
+aoeiiMiniGui.AddText('xm+93 BackgroundTrans y+30', 'Platform:')
+platform := aoeiiMiniGui.AddDDL('x+5 yp-2 Choose2', ['None', 'GameRanger', 'Voobly'])
+aoeiiMiniGui.addButtonEx('xm+93 y+5 w173', '>>> More Options', , moreOptions)
+aoeiiMiniGui.showEx('w400', 1)
+
+moreOptions(*) {
+    aoeiiMiniGui.Hide()
+    aoeiiGui.showEx(, 1)
+    appinterfaceUpdate()
+}
 
 ; Update check
 updateCheck(*) {
@@ -138,16 +142,16 @@ updateCheck(*) {
 }
 
 performGameAnalyze(*) {
-    static infoGui := 0
+    static infoGui := 0, infoText := 0, InfoBar := 0
     choice := MsgBoxEx(
         Format(
             'Check list:`n`n{}`n{}`n{}`n{}`n{}`n{}`n`n{}',
             '1 - Delayed start (Windows Vista/7)',
             '2 - Corrupted file',
-            '3 - The Conquerors Application location',
-            '4 - The Game Save Folder',
-            '5 - The Game Update',
-            '6 - The Game Corrupted Files',
+            '3 - The Conquerors application location',
+            '4 - The game save folder',
+            '5 - The game update',
+            '6 - The game corrupted files',
             'The app will try to fix these issues, do you wish to continue?'
         ), 'Check list', 4, 0x40
     ).result
@@ -212,18 +216,32 @@ performGameAnalyze(*) {
     InfoBar.Value += 1
 
     infoText.Text := 'Checking for existing fixes...'
-    ; Check if no fix exists
-    fix := ''
-    ignoreFiles := Map('wndmode.dll', 1, 'windmode.dll', 1)
-    Loop Files, aoeiiapp.workDirectory '\tools\fix\*', 'D' {
-        if aoeiiapp.folderMatch(A_LoopFileFullPath, aoeiiapp.gameLocation, ignoreFiles) {
-            fix := A_LoopFileName
+
+    if platform.Text != 'Voobly' {
+        ; Check if no fix exists
+        fix := ''
+        ignoreFiles := Map('wndmode.dll', 1, 'windmode.dll', 1)
+        Loop Files, aoeiiapp.workDirectory '\tools\fix\*', 'D' {
+            if aoeiiapp.folderMatch(A_LoopFileFullPath, aoeiiapp.gameLocation, ignoreFiles) {
+                fix := A_LoopFileName
+            }
         }
+        If fix = '' {
+            RunWait(aoeiiapp.tools['02_fix']['run'] ' "Update v05"')
+            aoeiiapp.applyDDrawFix()
+        }
+    } Else {
+        dllFiles := [
+            'dsound.dll',
+            'age2_x1\dsound.dll',
+            'ddraw.dll',
+            'age2_x1\ddraw.dll'
+        ]
+        for dll in dllFiles
+            If FileExist(aoeiiapp.gameLocation '\' dll)
+                FileRecycle(aoeiiapp.gameLocation '\' dll)
     }
-    If fix = '' {
-        RunWait(aoeiiapp.tools['02_fix']['run'] ' "Update v05"')
-        aoeiiapp.applyDDrawFix()
-    }
+
     InfoBar.Value += 1
 
     infoText.Text := 'Checking for missing files...'
@@ -274,3 +292,48 @@ chatSpam := aoeiiapp.readConfiguration('chatSpam')
     }
 }
 #HotIf
+
+#HotIf WinActive(aoeiiGui) || WinActive(aoeiiMiniGui)
+^r:: Reload()
+#HotIf
+
+if DirExist(aoeiiapp.gameLocation) {
+    ; Auto fix few things
+    ;
+    ; 1 - Delayed start for windows7/vista
+    GEs := [
+        A_WinDir '\System32\gameux.dll',
+        A_WinDir '\SysWOW64\gameux.dll'
+    ]
+    For GE in GEs {
+        Switch SubStr(A_OSVersion, 1, 3) {
+            Case '6.0', '6.1':
+                If FileExist(GE) {
+                    RunWait(Format(A_ComSpec ' /c takeown /f {}', GE), , 'Hide')
+                    RunWait(Format(A_ComSpec ' /c cacls {} /E /P %username%:F', GE), , 'Hide')
+                    RunWait(Format(A_ComSpec ' /c ren {} gameux_renamed.dll', GE), , 'Hide')
+                }
+        }
+    }
+
+    ; 2 - Check for a corrupted file
+    md5 := '7c1ae22e8f9d385d51b4f2eadd2a6d76'
+    dlltargets := [aoeiiapp.gameLocation '\dsound.dll', aoeiiapp.gameLocation '\age2_x1\dsound.dll']
+    For target in dlltargets
+        if FileExist(target) && md5 = aoeiiapp.hashFile(, target)
+            FileDelete(target)
+
+    ; 3 - Fix aoc wrong exe location
+    aocexe := aoeiiapp.gameLocation '\age2_x1.exe'
+    If FileExist(aocexe) {
+        if !DirExist(aoeiiapp.gameLocation '\Age2_x1')
+            DirCreate(aoeiiapp.gameLocation '\Age2_x1')
+        if !FileExist(aoeiiapp.gameLocation '\Age2_x1\age2_x1.exe')
+            FileMove(aocexe, aoeiiapp.gameLocation '\Age2_x1\', 1)
+        Else FileDelete(aocexe)
+    }
+
+    ; 4 - ; Create Multi folder in SaveGame if not exist
+    If !DirExist(aoeiiapp.gameLocation '\SaveGame\Multi')
+        DirCreate(aoeiiapp.gameLocation '\SaveGame\Multi')
+}

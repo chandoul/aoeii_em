@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.3'
+    version => '7.4'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -83,6 +83,20 @@ Class Base {
             'file', This.workDirectory '\tools\hai\hideallip.ahk',
             'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\hai\hideallip.ahk'),
             'workdir', This.workDirectory '\tools\hai\',
+            'pid', 0
+        ),
+        '09_hai', Map(
+            'title', 'GR Acc Switcher',
+            'file', This.workDirectory '\tools\gr\graccswitcher.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\gr\graccswitcher.ahk'),
+            'workdir', This.workDirectory '\tools\gr\',
+            'pid', 0
+        ),
+        '10_hai', Map(
+            'title', 'Scenarios',
+            'file', This.workDirectory '\tools\scx\scenario.ahk',
+            'run', cmdJoin(A_AhkPath, This.workDirectory '\tools\scx\scenario.ahk'),
+            'workdir', This.workDirectory '\tools\scx\',
             'pid', 0
         ),
     )
@@ -299,7 +313,9 @@ Class Base {
         package, destination, hide := 1, informMe := 1, overwrite := 'aoa',
         info := { text: '', subtext: '' }
     ) {
-        Static infoGui := 0
+        Static infoGui := 0,
+            infoText := 0,
+            InfoBar := 0
         If !infoGui {
             infoGui := GuiEx(, 'Package Extraction')
             infoGui.OnEvent('Close', terminate)
@@ -509,8 +525,10 @@ Class Base {
 
     /**
      * Check if folder files exists in another folder
-     * @param folder
-     * @param anotherFolder 
+     * @param folder 
+     * @param anotherFolder
+     * @param {Map} ignoreFiles 
+     * @returns {Integer} 
      */
     folderMatch(folder, anotherFolder, ignoreFiles := Map()) {
         Loop Files, folder '\*.*', 'R' {
@@ -584,12 +602,26 @@ Class Base {
         ;      return JSON.LoadFile(This.workDirectory '\tools\package.json')
         return JSON.LoadFile(This.workDirectory '\tools\package.json')
     }
+
+    grayOutImage(img, control) {
+        static MatrixGreyScale := "0.299|0.299|0.299|0|0|0.587|0.587|0.587|0|0|0.114|0.114|0.114|0|0|0|0|0|1|0|0|0|0|0|1"
+        pBitmap := Gdip_CreateBitmapFromFile(img)
+        graphic := Gdip_GraphicsFromImage(pBitmap)
+        Gdip_DrawImage(graphic, pBitmap, , , , , , , , , MatrixGreyScale)
+        hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
+        control.value := "HBITMAP:*" hBitmap
+        Gdip_DeleteGraphics(graphic)
+        Gdip_DisposeImage(pBitmap)
+    }
 }
 
 
 Class Button {
     workDirectory => Base().workDirectory
     default => [
+        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
+    ]
+    defaultRounded => [
         [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
     ]
     checkedDisabled => [
@@ -765,16 +797,18 @@ Class GuiEx extends Gui {
         }
     }
     addButtonEx(options := '', text := '', theme := Button().default, clickCallBack := 0) {
+        buttonTheme := theme
         b := This.AddButton(options, text)
         CreateImageButton(b, 0, theme*)
         b.DefineProp('TextEx', { Set: textEx })
-        textEx(b, value, text := '', theme := Button().default) {
+
+        textEx(b, value, text := '') {
             b.text := value
-            update(b, theme)
+            update(b)
         }
 
         b.DefineProp('update', { Call: update })
-        update(b, theme := Button().default) {
+        update(b, theme := buttonTheme) {
             CreateImageButton(
                 b,
                 0,
@@ -792,11 +826,21 @@ Class GuiEx extends Gui {
         Return b
     }
     addCheckBoxEx(options := '', text := '', clickCallBack := 0, defaultValue := 1) {
-        B := This.addButtonEx('h28 w24 ' options, , Button().cbUnChecked)
+        B := This.addButtonEx('h24 w24 ' options, , Button().cbUnChecked)
         B.GetPos(&X1, &Y1, , &Height1)
 
         T := This.AddText('BackgroundTrans c4C4C4C x+5', text)
         T.GetPos(&X2, &Y2, , &Height2)
+
+        if (Y1 + Height1 > y2 + Height2) {
+            ym := (Y1 + Height1 - y2 - Height2) / 2
+            T.Move(, Y2 + ym)
+        }
+
+        if (Y1 + Height1 < y2 + Height2) {
+            ym := (Y2 + Height2 - y1 - Height1) / 2
+            B.Move(, Y1 + ym)
+        }
 
         B.cbValue := 0
 
