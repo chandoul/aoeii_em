@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.4'
+    version => '7.5'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -378,8 +378,8 @@ Class Base {
             If wnd {
                 wnd.Opt('Disabled')
             }
-            If 'Yes' = MsgBoxEx('Game is not yet located!, want to select now?', 'Game', 0x4, 0x40).result
-                Run(This.tools['00_game']['file'])
+            MsgBoxEx('Game is not yet located!`nYou must select it to continue!', 'Game', , 0x40)
+            Run(This.tools['00_game']['file'])
             ExitApp()
         }
     }

@@ -61,14 +61,14 @@ For key, tool in aoeiiapp.tools {
         aoeiiGui.MarginY := 10
     h := aoeiiGui.addButtonEx('x' (!Mod(index - 1, 4) ? "m" : "+20") ' w180', tool["title"], , launchSubApp)
     features[h] := { run: tool['file'], workdir: tool['workdir'] }
-    if !FileExist(tool['file'])
+    if key ~= '00_game|08_hai'
+        Continue
+    if !FileExist(tool['file']) || !gameapp.isValidGameDirectory(gameapp.gameLocation)
         h.Enabled := false
 }
 aoeiiGui.MarginY := 20
 
 launchSubApp(h, *) => Run(Format('{}', features[h].run), features[h].workdir)
-
-aoeiiapp.isGameFolderSelected()
 
 appinterfaceUpdate() {
     aoeiiGui.GetPos(, , &W, &H)
@@ -119,14 +119,18 @@ aoeiiMiniGui := GuiEx(, aoeiiapp.name)
 aoeiiMiniGui.aoemain := true
 aoeiiMiniGui.initiate(, , 0)
 aoeiiMiniGui.SetFont('s12')
-aoeiiMiniGui.addButtonEx(
+analyze := aoeiiMiniGui.addButtonEx(
     'ym+25 xm w360 h100', 'Enhance / Update My Game', , performGameAnalyze
 )
 aoeiiMiniGui.SetFont('s8')
-aoeiiMiniGui.AddText('xm+93 BackgroundTrans y+30', 'Platform:')
+aoeiiMiniGui.AddText('xm+93 BackgroundTrans y+5', 'Platform:')
 platform := aoeiiMiniGui.AddDDL('x+5 yp-2 Choose2', ['None', 'GameRanger', 'Voobly'])
-aoeiiMiniGui.addButtonEx('xm+93 y+5 w173', '>>> More Options', , moreOptions)
+aoeiiMiniGui.addButtonEx('xm+93 y+30 w173', '>>> More Options', , moreOptions)
 aoeiiMiniGui.showEx('w400', 1)
+
+if !gameapp.isValidGameDirectory(gameapp.gameLocation) {
+    analyze.Enabled := false
+}
 
 moreOptions(*) {
     aoeiiMiniGui.Hide()
@@ -142,6 +146,7 @@ updateCheck(*) {
 }
 
 performGameAnalyze(*) {
+    aoeiiapp.isGameFolderSelected()
     static infoGui := 0, infoText := 0, InfoBar := 0
     choice := MsgBoxEx(
         Format(
