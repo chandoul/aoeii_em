@@ -94,8 +94,9 @@ updateDM(Ctrl, Info) {
                     }
                     dmapp.downloadPackage(dmPackageLink, dmPackagePath, dmPackageSize, , , 1)
                 }
-                If DirExist(gameLocation '\Games\' dmGameName)
-                    DirDelete(gameLocation '\Games\' dmGameName, 1)
+
+                ;If DirExist(gameLocation '\Games\' dmGameName)
+                ;    DirDelete(gameLocation '\Games\' dmGameName, 1)
 
                 ; Extract the data mod files
                 if !dmapp.extractPackage(dmPackagePath, gameLocation '\') {

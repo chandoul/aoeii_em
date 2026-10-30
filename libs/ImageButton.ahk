@@ -287,8 +287,7 @@ CreateImageButton(GuiBtn, Mode, Options*) {
             ; Free resources
             DllCall("Gdiplus.dll\GdipDeleteBrush", "Ptr", PBRUSH)
             DllCall("Gdiplus.dll\GdipDeletePath", "Ptr", PPATH)
-        }
-        Else { ; Create a bitmap from HBITMAP or file
+        } Else { ; Create a bitmap from HBITMAP or file
             PBM := 0
             If IsInteger(Image)
                 If (Opt[2] = "HICON")

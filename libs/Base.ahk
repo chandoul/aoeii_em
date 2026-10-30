@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.5'
+    version => '7.6'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -619,7 +619,7 @@ Class Base {
 Class Button {
     workDirectory => Base().workDirectory
     default => [
-        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
+        [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF, 10]
     ]
     defaultRounded => [
         [This.workDirectory '\assets\000_50212.bmp', , 0xFFFFFF]
@@ -769,10 +769,11 @@ Class GuiEx extends Gui {
             }
 
             This.SetFont('s10')
-            This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 27, 7), 'X', , (*) => WinClose(This.hwnd))
+            This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 27, 6), 'X', , (*) => WinClose(This.hwnd))
+            This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 54, 6), '─', , (*) => WinMinimize(This.hwnd)).SetFont('Bold')
 
             If !This.HasProp('aoemain') && !This.HasProp('aoemsg')
-                This.addButtonEx(Format('x{} y{} w60 h18', bWidth - 90, 7), '◄ Back', , (*) => goMain())
+                This.addButtonEx(Format('x{} y{} w60 h18', bWidth - 117, 6), '◄ Back', , (*) => goMain())
 
             goMain() {
                 Run(Base().workDirectory '\tools\aoeii_em.ahk')
