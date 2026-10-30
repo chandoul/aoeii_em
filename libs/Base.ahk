@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.6'
+    version => '7.7'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -770,7 +770,9 @@ Class GuiEx extends Gui {
 
             This.SetFont('s10')
             This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 27, 6), 'X', , (*) => WinClose(This.hwnd))
-            This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 54, 6), '─', , (*) => WinMinimize(This.hwnd)).SetFont('Bold')
+            
+            if !This.HasProp('aoemsg')
+                This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 54, 6), '─', , (*) => WinMinimize(This.hwnd)).SetFont('Bold')
 
             If !This.HasProp('aoemain') && !This.HasProp('aoemsg')
                 This.addButtonEx(Format('x{} y{} w60 h18', bWidth - 117, 6), '◄ Back', , (*) => goMain())
