@@ -24,6 +24,7 @@ tools/scenario/*
 .vscode/
 release/Errors.txt
 tools/screenshots.ahk
+tools/gr/settingfetch.ahk
 spectrum.ahk
 bass.dll
 assets/mp3/FUNK UNIVERSO (SLOWED) by lssgz.mp3

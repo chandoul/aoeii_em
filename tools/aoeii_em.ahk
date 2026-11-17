@@ -298,10 +298,6 @@ chatSpam := aoeiiapp.readConfiguration('chatSpam')
 }
 #HotIf
 
-#HotIf WinActive(aoeiiGui) || WinActive(aoeiiMiniGui)
-^r:: Reload()
-#HotIf
-
 if DirExist(aoeiiapp.gameLocation) {
     ; Auto fix few things
     ;

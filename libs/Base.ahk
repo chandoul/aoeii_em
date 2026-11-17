@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.7'
+    version => '7.8'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -110,6 +110,8 @@ Class Base {
     gameLocation => This.readConfiguration('GameLocation')
     gameLocationHistory => This.readConfiguration('GameLocationHistory')
     gameRangerExecutable => A_AppData '\GameRanger\GameRanger\GameRanger.exe'
+    gameRangerPrefs => A_AppData '\GameRanger\GameRanger Prefs'
+    gameRangerAccounts => A_AppData '\GameRanger\GameRanger Prefs\Accounts'
     gameRangerSetting => A_AppData '\GameRanger\GameRanger Prefs\Settings'
     gameRegLocation => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Age of Empires II AIO'
     userRegLayer => "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"
@@ -662,9 +664,10 @@ Class GuiEx extends Gui {
             This.addButtonEx('xp+85 yp', 'Exit', , appQuit)
             This.MarginX := 20
         }
+
         This.footer := footer
-        appReload(Ctrl, Info) => Reload()
-        appQuit(Ctrl, Info) => ExitApp()
+        appReload(*) => Reload()
+        appQuit(*) => ExitApp()
 
         ;OnMessage(0x200, OnMouseMove)
         OnMouseMove(wParam, lParam, msg, hwnd) {
@@ -687,6 +690,10 @@ Class GuiEx extends Gui {
                 lastControl := control
             }
         }
+
+        HotIfWinActive('ahk_id ' This.Hwnd)
+        Hotkey('^r', (*) => Reload())
+        HotIfWinActive()
     }
     scrollableGui() {
         vmGuiSB := ScrollBar(this, 200, 400)
@@ -770,7 +777,7 @@ Class GuiEx extends Gui {
 
             This.SetFont('s10')
             This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 27, 6), 'X', , (*) => WinClose(This.hwnd))
-            
+
             if !This.HasProp('aoemsg')
                 This.addButtonEx(Format('x{} y{} w20 h18', bWidth - 54, 6), '─', , (*) => WinMinimize(This.hwnd)).SetFont('Bold')
 
@@ -1003,6 +1010,7 @@ Class MsgBoxEx {
                 This.hIcon := This.msgGui.AddPicture('xm ym+20 w48 h48 BackgroundTrans', This.infoIcon)
                 SoundPlay(This.infoSound)
         }
+        
         If Text = '' {
             Switch Function {
                 Case 2: Text := 'Press Abort to stop'

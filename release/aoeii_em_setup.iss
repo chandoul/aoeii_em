@@ -62,6 +62,8 @@ Source: "..\tools\version\version.ahk"; DestDir: "{app}\tools\version"; Flags: i
 Source: "..\tools\vm\visualmods.ahk"; DestDir: "{app}\tools\vm"; Flags: ignoreversion
 // hide all ip
 Source: "..\tools\hai\hideallip.ahk"; DestDir: "{app}\tools\hai"; Flags: ignoreversion
+// gr acc switcher
+Source: "..\tools\gr\graccswitcher.ahk"; DestDir: "{app}\tools\gr"; Flags: ignoreversion
 // main
 Source: "..\tools\aoeii_em.ahk"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "..\tools\gamefiles.json"; DestDir: "{app}\tools"; Flags: ignoreversion
