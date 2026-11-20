@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.8'
+    version => '7.9'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -784,6 +784,7 @@ Class GuiEx extends Gui {
             If !This.HasProp('aoemain') && !This.HasProp('aoemsg')
                 This.addButtonEx(Format('x{} y{} w60 h18', bWidth - 117, 6), '◄ Back', , (*) => goMain())
 
+
             goMain() {
                 Run(Base().workDirectory '\tools\aoeii_em.ahk')
                 WinClose(This.hwnd)
@@ -945,14 +946,42 @@ Class GuiEx extends Gui {
         This.SetFont('s10')
         This.split := This.addText('xm w420 0x10')
         This.MarginY := 0
-        This.addPictureEx('xm', 'aok_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\empires2.exe') ? Run(gameLocation '\empires2.exe', gameLocation) : '')
-        This.addPictureEx('yp', 'aoc_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x1.exe') ? Run(gameLocation '\age2_x1\age2_x1.exe', gameLocation) : '')
-        This.addPictureEx('yp', 'fe_c.png').OnEvent('Click', (*) => FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : '')
+
+        This.addPictureEx('xm', 'aok_c.png').OnEvent('Click', runAgeOfKings)
+        This.addPictureEx('yp', 'aoc_c.png').OnEvent('Click', runTheConquerors)
+        This.addPictureEx('yp', 'fe_c.png').OnEvent('Click', runForgottenEmpires)
+
         gameLocation := Base().gameLocation
         If Game().isValidGameDirectory(gameLocation)
             This.ft := This.AddEdit('BackgroundBlack yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
         Else This.ft := This.AddEdit('Backgroundff0000 yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
         This.MarginY := 20
+
+        runAgeOfKings(*) {
+            static timeout := 0
+            if timeout
+                return
+            timeout := 1
+            SetTimer((*) => timeout := 0, -3000)
+            FileExist(gameLocation '\empires2.exe') ? Run(gameLocation '\empires2.exe', gameLocation) : ''
+        }
+        runTheConquerors(*) {
+            static timeout := 0
+            if timeout
+                return
+            timeout := 1
+            SetTimer((*) => timeout := 0, -3000)
+            FileExist(gameLocation '\age2_x1\age2_x1.exe') ? Run(gameLocation '\age2_x1\age2_x1.exe', gameLocation) : ''
+        }
+        runForgottenEmpires(*) {
+            static timeout := 0
+            if timeout
+                return
+            timeout := 1
+            SetTimer((*) => timeout := 0, -3000)
+            FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : ''
+        }
+
         ;If app && app.HasMethod('ensurePackage') {
         ;    This.SetFont('s8')
         ;    This.updatePackage := This.addButtonEx('xm w280', 'Update Package', , update)
@@ -1010,7 +1039,7 @@ Class MsgBoxEx {
                 This.hIcon := This.msgGui.AddPicture('xm ym+20 w48 h48 BackgroundTrans', This.infoIcon)
                 SoundPlay(This.infoSound)
         }
-        
+
         If Text = '' {
             Switch Function {
                 Case 2: Text := 'Press Abort to stop'
@@ -1591,6 +1620,202 @@ Class HoldOn {
         }
     }
 }
+
+
+class bass {
+    bassDLL := Base().workDirectory '\libs\bass\' (A_PtrSize = 8 ? 'x64' : '') '\bass.dll'
+    BASS_DATA_FFT256 := 0x80000000
+    BASS_ACTIVE_PLAYING := 1
+    BASS_ACTIVE_PAUSED := 2
+    BASS_ACTIVE_STOPPED := 0
+
+    hStream := 0
+    fftBuf := ""
+    pToken := 0
+
+    hGui := 0
+    gui := 0
+
+    hdc := 0
+    hbm := 0
+    obm := 0
+    G := 0
+    pBrush := 0
+
+    WIN_W := 620
+    WIN_H := 200
+    DRAW_W := 620
+    DRAW_H := 200
+
+    BAR_COUNT := 64
+    BAR_W := 8
+    BAR_GAP := 2
+
+    UpdateSpectrumMethod := 0
+
+    __New(guiObj := 0, mp3Path := FileSelect(1, , "Select an MP3 file", "Audio (*.mp3)")) {
+        if Type(guiObj) != 'Gui'
+            return
+
+        ; Keep GUI object alive
+        this.gui := guiObj
+
+        guiObj.Opt('-Caption +E0x80000 +LastFound +AlwaysOnTop +ToolWindow')
+        guiObj.BackColor := "101010"
+
+        if !DllCall("LoadLibrary", "Str", this.bassDLL, "Ptr") {
+            MsgBoxEx("Failed to load bass.dll. Ensure a clean installation of the app", 'Warning', , 0x30)
+            return
+        }
+
+        if !DllCall("bass.dll\BASS_Init", "Int", -1, "UInt", 44100, "UInt", 0, "Ptr", 0, "Ptr", 0) {
+            MsgBoxEx("BASS_Init failed.", 'Warning', , 0x30)
+            return
+        }
+
+        this.hGui := guiObj.Hwnd
+
+        this.hdc := CreateCompatibleDC()
+        this.hbm := CreateDIBSection(this.DRAW_W, this.DRAW_H)
+        this.obm := SelectObject(this.hdc, this.hbm)
+        this.G := Gdip_GraphicsFromHDC(this.hdc)
+
+        Gdip_SetSmoothingMode(this.G, 4)
+        this.pBrush := Gdip_BrushCreateSolid(0xFF00FF00)
+
+        if !FileExist(mp3Path) {
+            this.Cleanup()
+            return
+        }
+
+        this.hStream := DllCall("bass.dll\BASS_StreamCreateFile",
+            "Int", 0,
+            "Str", mp3Path,
+            "Int64", 0,
+            "Int64", 0,
+            "UInt", 0x80000000,
+            "UInt")
+
+        if !this.hStream {
+            MsgBoxEx("Failed to create stream. Error: " DllCall("bass.dll\BASS_ErrorGetCode"), 'Warning', , 0x30)
+            this.Cleanup()
+            return
+        }
+
+        DllCall("bass.dll\BASS_ChannelPlay", "UInt", this.hStream, "Int", 0)
+
+        this.fftBuf := Buffer(128 * 4, 0)
+
+        ; Show GUI after initialization
+        guiObj.Show("w" this.WIN_W " h" this.WIN_H " NA")
+
+        this.UpdateSpectrumMethod := ObjBindMethod(this, 'UpdateSpectrum')
+
+        ; Draw first frame immediately
+        this.UpdateSpectrum()
+
+        ; Continue updating spectrum
+        SetTimer(this.UpdateSpectrumMethod, 30)
+    }
+
+    Cleanup() {
+        if this.UpdateSpectrumMethod
+            SetTimer(this.UpdateSpectrumMethod, 0)
+
+        if this.hStream {
+            DllCall("bass.dll\BASS_ChannelStop", "UInt", this.hStream)
+            DllCall("bass.dll\BASS_StreamFree", "UInt", this.hStream)
+            this.hStream := 0
+        }
+
+        DllCall("bass.dll\BASS_Free")
+
+        ; GDI+ cleanup (order matters)
+        if this.pBrush {
+            Gdip_DeleteBrush(this.pBrush)
+            this.pBrush := 0
+        }
+
+        if this.G {
+            Gdip_DeleteGraphics(this.G)
+            this.G := 0
+        }
+
+        if this.obm {
+            SelectObject(this.hdc, this.obm)
+            this.obm := 0
+        }
+
+        if this.hbm {
+            DeleteObject(this.hbm)
+            this.hbm := 0
+        }
+
+        if this.hdc {
+            DeleteDC(this.hdc)
+            this.hdc := 0
+        }
+    }
+
+    UpdateSpectrum(*) {
+        if !this.hStream
+            return
+
+        state := DllCall("bass.dll\BASS_ChannelIsActive", "UInt", this.hStream)
+
+        ; Stopped entirely
+        if (state = this.BASS_ACTIVE_STOPPED) {
+            SetTimer(this.UpdateSpectrumMethod, 0)
+            return
+        }
+
+        ; Paused: freeze visual
+        if (state = this.BASS_ACTIVE_PAUSED)
+            return
+
+        ; Get FFT data
+        ret := DllCall("bass.dll\BASS_ChannelGetData",
+            "UInt", this.hStream,
+            "Ptr", this.fftBuf,
+            "UInt", this.BASS_DATA_FFT256)
+
+        if (ret = -1)
+            return
+
+        ; Clear canvas
+        Gdip_GraphicsClear(this.G, 0xFF101010)
+
+        ; Draw spectrum bars
+        Loop this.BAR_COUNT {
+            val := NumGet(this.fftBuf, (A_Index - 1) * 4, "Float")
+            barH := Min(this.DRAW_H, Round(val * 400))
+
+            if (barH <= 0)
+                continue
+
+            barX := (A_Index - 1) * (this.BAR_W + this.BAR_GAP)
+            barY := this.DRAW_H - barH
+
+            Gdip_FillRectangle(this.G, this.pBrush, barX, barY, this.BAR_W, barH)
+        }
+
+        ; Update layered window
+        result := UpdateLayeredWindow(
+            this.hGui,
+            this.hdc,
+            20,
+            60,
+            this.DRAW_W,
+            this.DRAW_H
+        )
+
+        if !result
+            OutputDebug("UpdateLayeredWindow failed: " A_LastError)
+    }
+}
+
+; Keep bass instance alive
+; myBass := bass(Gui())
 
 cmdJoin(args*) {
     argsJoined := ''
