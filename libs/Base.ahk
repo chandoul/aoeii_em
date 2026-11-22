@@ -6,7 +6,7 @@ Class Base {
     description => (
         'An AutoHotkey application holds several useful tools that helps with the game'
     )
-    version => '7.9'
+    version => '8.0'
     author => 'Smile'
     license => 'MIT'
     packageHashLink => 'https://raw.githubusercontent.com/chandoul/aoeii_em/refs/heads/master/tools/package.json'
@@ -799,11 +799,16 @@ Class GuiEx extends Gui {
             If This.footer {
                 This.GetPos(, , &W, &H)
                 This.split.Move(, , W - 60)
-                This.ft.Move(, , W - 188)
-                ;If This.HasProp('updatePackage') {
-                ;    This.updatePackage.Move(, , W - 55)
-                ;    This.updatePackage.Update()
-                ;}
+                This.ft.Move(, , W - 288)
+                This.ft.GetPos(&X, &Y, &W, &H)
+
+                if This.HasProp('aoemain') {
+                    basstheme := bass(,
+                        this.workDirectory '\assets\mp3\UNIVERSO.mp3',
+                        this.Hwnd, { WIN_X: X + W + 2, WIN_Y: Y, WIN_W: 100, WIN_H: H }
+                    )
+                    basstheme.PauseBtn := This.addButtonEx('x' X + W + 104 ' y' Y ' w' H ' h' H, '⏸', , (*) => basstheme.Toggle())
+                }
             }
         }
     }
@@ -953,8 +958,8 @@ Class GuiEx extends Gui {
 
         gameLocation := Base().gameLocation
         If Game().isValidGameDirectory(gameLocation)
-            This.ft := This.AddEdit('BackgroundBlack yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
-        Else This.ft := This.AddEdit('Backgroundff0000 yp+10 x+20 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
+            This.ft := This.AddEdit('BackgroundBlack yp+10 x+10 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
+        Else This.ft := This.AddEdit('Backgroundff0000 yp+10 x+10 cWhite w280 -E0x200 h20 Center ReadOnly', Base().gameLocation)
         This.MarginY := 20
 
         runAgeOfKings(*) {
@@ -981,15 +986,6 @@ Class GuiEx extends Gui {
             SetTimer((*) => timeout := 0, -3000)
             FileExist(gameLocation '\age2_x1\age2_x2.exe') ? Run(gameLocation '\age2_x1\age2_x2.exe', gameLocation) : ''
         }
-
-        ;If app && app.HasMethod('ensurePackage') {
-        ;    This.SetFont('s8')
-        ;    This.updatePackage := This.addButtonEx('xm w280', 'Update Package', , update)
-        ;    update(*) {
-        ;        app.ensurePackage(1)
-        ;        Reload()
-        ;    }
-        ;}
     }
 }
 
@@ -1622,11 +1618,11 @@ Class HoldOn {
 }
 
 
-class bass {
+class bass extends Base {
     bassDLL := Base().workDirectory '\libs\bass\' (A_PtrSize = 8 ? 'x64' : '') '\bass.dll'
     BASS_DATA_FFT256 := 0x80000000
     BASS_ACTIVE_PLAYING := 1
-    BASS_ACTIVE_PAUSED := 2
+    BASS_ACTIVE_PAUSED := 3
     BASS_ACTIVE_STOPPED := 0
 
     hStream := 0
@@ -1640,28 +1636,41 @@ class bass {
     hbm := 0
     obm := 0
     G := 0
-    pBrush := 0
+    pBarBrush := 0
+    pBackBrush := 0
 
+    WIN_X := 0
+    WIN_Y := 0
     WIN_W := 620
     WIN_H := 200
-    DRAW_W := 620
-    DRAW_H := 200
 
-    BAR_COUNT := 64
-    BAR_W := 8
-    BAR_GAP := 2
+    BAR_COUNT := this.WIN_W / 9
+    BAR_W := this.WIN_W / 155
+    BAR_GAP := 1
+
+    PauseBtn := 0
+
+    BASS_SAMPLE_LOOP := 0x4
+    Length := 0
 
     UpdateSpectrumMethod := 0
 
-    __New(guiObj := 0, mp3Path := FileSelect(1, , "Select an MP3 file", "Audio (*.mp3)")) {
+    __New(guiObj := Gui(), mp3Path := FileSelect(1, , "Select an MP3 file", "Audio (*.mp3)"), parent := 0, shOptions := '') {
+        WM_LBUTTONDOWN(*) {
+
+        }
+
+        THIS.WIN_X := shOptions.HasProp('WIN_X') ? shOptions.WIN_X : THIS.WIN_X
+        THIS.WIN_Y := shOptions.HasProp('WIN_Y') ? shOptions.WIN_Y : THIS.WIN_Y
+        THIS.WIN_W := shOptions.HasProp('WIN_W') ? shOptions.WIN_W : THIS.WIN_W
+        THIS.WIN_H := shOptions.HasProp('WIN_H') ? shOptions.WIN_H : THIS.WIN_H
+
         if Type(guiObj) != 'Gui'
             return
 
-        ; Keep GUI object alive
-        this.gui := guiObj
-
-        guiObj.Opt('-Caption +E0x80000 +LastFound +AlwaysOnTop +ToolWindow')
+        guiObj.Opt('-Caption +E0x80000 +LastFound +AlwaysOnTop +ToolWindow' (parent ? ' +Parent' parent : ''))
         guiObj.BackColor := "101010"
+
 
         if !DllCall("LoadLibrary", "Str", this.bassDLL, "Ptr") {
             MsgBoxEx("Failed to load bass.dll. Ensure a clean installation of the app", 'Warning', , 0x30)
@@ -1673,15 +1682,23 @@ class bass {
             return
         }
 
+
+        if !this.pToken := Gdip_Startup() {
+            MsgBoxEx("GDI+ failed to start.", 'Warning', , 0x30)
+            return
+        }
+
         this.hGui := guiObj.Hwnd
 
         this.hdc := CreateCompatibleDC()
-        this.hbm := CreateDIBSection(this.DRAW_W, this.DRAW_H)
+        this.hbm := CreateDIBSection(this.WIN_W, this.WIN_H)
         this.obm := SelectObject(this.hdc, this.hbm)
         this.G := Gdip_GraphicsFromHDC(this.hdc)
 
-        Gdip_SetSmoothingMode(this.G, 4)
-        this.pBrush := Gdip_BrushCreateSolid(0xFF00FF00)
+        Gdip_SetSmoothingMode(this.G, 3)
+
+        this.pBarBrush := Gdip_BrushCreateSolid(0xFF00FF00)
+        this.pBackBrush := Gdip_BrushCreateSolid(0xFF4C4C4C)
 
         if !FileExist(mp3Path) {
             this.Cleanup()
@@ -1693,8 +1710,9 @@ class bass {
             "Str", mp3Path,
             "Int64", 0,
             "Int64", 0,
-            "UInt", 0x80000000,
+            "UInt", 0x80000004,
             "UInt")
+
 
         if !this.hStream {
             MsgBoxEx("Failed to create stream. Error: " DllCall("bass.dll\BASS_ErrorGetCode"), 'Warning', , 0x30)
@@ -1702,17 +1720,19 @@ class bass {
             return
         }
 
+        this.Length := DllCall("bass.dll\BASS_ChannelGetLength",
+            "UInt", this.hStream,
+            "UInt", 0,
+            "UInt64")
+
+
         DllCall("bass.dll\BASS_ChannelPlay", "UInt", this.hStream, "Int", 0)
 
         this.fftBuf := Buffer(128 * 4, 0)
 
-        ; Show GUI after initialization
-        guiObj.Show("w" this.WIN_W " h" this.WIN_H " NA")
+        guiObj.Show(Format("x{} y{} w{} h{} NA ", this.WIN_X, this.WIN_Y, this.WIN_W + 2, this.WIN_H + 2))
 
         this.UpdateSpectrumMethod := ObjBindMethod(this, 'UpdateSpectrum')
-
-        ; Draw first frame immediately
-        this.UpdateSpectrum()
 
         ; Continue updating spectrum
         SetTimer(this.UpdateSpectrumMethod, 30)
@@ -1731,9 +1751,14 @@ class bass {
         DllCall("bass.dll\BASS_Free")
 
         ; GDI+ cleanup (order matters)
-        if this.pBrush {
-            Gdip_DeleteBrush(this.pBrush)
-            this.pBrush := 0
+        if this.pBarBrush {
+            Gdip_DeleteBrush(this.pBarBrush)
+            this.pBarBrush := 0
+        }
+
+        if this.pBackBrush {
+            Gdip_DeleteBrush(this.pBackBrush)
+            this.pBackBrush := 0
         }
 
         if this.G {
@@ -1785,32 +1810,54 @@ class bass {
         ; Clear canvas
         Gdip_GraphicsClear(this.G, 0xFF101010)
 
+        position := DllCall("bass.dll\BASS_ChannelGetPosition",
+            "UInt", this.hStream,
+            "UInt", 0,
+            "UInt64")
+
+        Gdip_FillRectangle(this.G, this.pBackBrush, 0, 0, this.WIN_W * position / this.Length, this.WIN_H)
+
         ; Draw spectrum bars
         Loop this.BAR_COUNT {
             val := NumGet(this.fftBuf, (A_Index - 1) * 4, "Float")
-            barH := Min(this.DRAW_H, Round(val * 400))
+            barH := Min(this.WIN_H, Round(val * this.WIN_H * 3))
 
             if (barH <= 0)
                 continue
 
             barX := (A_Index - 1) * (this.BAR_W + this.BAR_GAP)
-            barY := this.DRAW_H - barH
+            barY := this.WIN_H - barH
 
-            Gdip_FillRectangle(this.G, this.pBrush, barX, barY, this.BAR_W, barH)
+            Gdip_FillRectangle(this.G, this.pBarBrush, barX + 1, barY + 1, this.BAR_W, barH)
         }
 
         ; Update layered window
         result := UpdateLayeredWindow(
             this.hGui,
             this.hdc,
-            20,
-            60,
-            this.DRAW_W,
-            this.DRAW_H
+            this.WIN_X,
+            this.WIN_Y,
+            this.WIN_W,
+            this.WIN_H
         )
 
         if !result
             OutputDebug("UpdateLayeredWindow failed: " A_LastError)
+    }
+
+    Toggle() {
+        if !this.hStream
+            return
+        state := DllCall("bass.dll\BASS_ChannelIsActive", "UInt", this.hStream)
+        if (state = this.BASS_ACTIVE_PLAYING) {
+            DllCall("bass.dll\BASS_ChannelPause", "UInt", this.hStream)
+            SetTimer(this.UpdateSpectrumMethod, 0)
+            this.PauseBtn.TextEx := "▶"
+        } else if (state = this.BASS_ACTIVE_PAUSED) {
+            DllCall("bass.dll\BASS_ChannelPlay", "UInt", this.hStream, "Int", 0)
+            SetTimer(this.UpdateSpectrumMethod, 30)
+            this.PauseBtn.TextEx := "⏸"
+        }
     }
 }
 
@@ -1832,3 +1879,5 @@ cmdJoin(args*) {
 #Include ScrollBars.ahk
 #Include LockCheck.ahk
 #Include JSON.ahk
+
+#SingleInstance Force
